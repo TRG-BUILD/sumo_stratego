@@ -1,0 +1,8 @@
+<edgedata>
+    <interval id="dst" begin="0" end="3600">
+        <edge id="CW" value="100.00"/>
+        <edge id="CS" value="100.00"/>
+        <edge id="CN" value="100.00"/>
+        <edge id="CE" value="100.00"/>
+    </interval>
+</edgedata>

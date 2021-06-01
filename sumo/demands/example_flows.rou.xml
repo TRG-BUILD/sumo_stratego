@@ -1,0 +1,12 @@
+<routes>
+    <vType id="sporty_car" vClass="passenger" maxSpeed="60" speedFactor="1.3" speedDev="0.1" sigma="0.1" />
+    <vType id="bus" vClass="bus"  maxSpeed="50" speedFactor="1.1" speedDev="0.1" />
+    <vType id="bike" vClass="bicycle"/>
+
+    <flow id="sporty" type="sporty_car" begin="0" end="5000" number="500" from="WC" to="CE" departPos="base" departLane="best" />
+    <flow id="bus" type="bus" begin="0" end="5000" number="100" from="WC" to="CE" departPos="base" departLane="best" />
+    <flow id="bike1" type="bike" begin="0" end="5000" number="500" from="NC" to="CS" departPos="base" departLane="best" />
+    <flow id="bike2" type="bike" begin="0" end="5000" number="500" from="SC" to="CE" departPos="base" departLane="best" />
+    <trip id="0" depart="0.00" from="SC" to="CE" type="bike"/>
+    <trip id="gay" depart="1.00" from="NC" to="CE" type="bike"/>
+</routes>

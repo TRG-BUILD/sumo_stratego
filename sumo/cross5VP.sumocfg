@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="networks/cross5_LFR_exits.net.xml"/>
+        <additional-files value="networks/cross5.tll.xml"/>
+        <route-files value="
+            demands/vehicles.rou.xml
+            "/>
+    </input>
+
+    <report>
+        <verbose value="true"/>
+        <no-step-log value="true"/>
+    </report>
+    
+
+    <processing>
+        <time-to-teleport value="-1"/>
+    </processing>
+
+    <gui_only>
+        <gui-settings-file value="viewsettings.xml"/>
+    </gui_only>
+
+</configuration>

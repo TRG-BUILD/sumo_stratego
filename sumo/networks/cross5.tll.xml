@@ -1,0 +1,8 @@
+<additional>
+    <tlLogic id="C" type="static" programID="1" offset="0">
+        <phase duration="10" state="gGgGrrrrrrgGgGrrrrrrrGrG" name="NS_xFR"/>
+        <phase duration="10" state="rrrrGrrrrrrrrrGrrrrrrrrr" name="NS_Lxx"/>
+        <phase duration="10" state="rrrrrgGgGgrrrrrgGgGgGrGr" name="EW_lFR"/>
+        <phase duration="10" state="rrrrrrrrrGrrrrrrrrrGrrrr" name="EW_Lxx"/>
+    </tlLogic>
+</additional>

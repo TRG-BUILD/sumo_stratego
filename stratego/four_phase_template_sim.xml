@@ -1,0 +1,4871 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.5//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_5.dtd'>
+<nta>
+	<declaration>//{1,0,0,0} -&gt; N_xRF, S_xRF 
+//{0,1,0,0} -&gt; N_Lxx, S_Lxx
+//{0,0,1,0} -&gt; E_lRF, W_lRF
+//{0,0,0,1} -&gt; E_Lxx, W_Lxx
+
+// state variables
+const int L = 3; // number of lanes with differen maneuvers per road 
+int A[L] = {0, 0, 0}; //{3, 5, 3};
+int B[L] = {0, 0, 0}; //{1, 7, 0};
+clock x = 0.0;
+
+// disturbances
+const int p_move_add[L] = {0, 0, 0};
+const int rAdd=0, rRemA=1, rRemB=1;
+
+// communication between phases
+const int N = 4; // number of phases
+bool is_active[N] = {1, 0, 0, 0}; //{1, 0, 0, 0};
+broadcast chan phaseChan[N];
+
+/*options for the synced transitions,
+/should not be able to sync to itself, 
+there is Extend functionality for that already
++ it deadlocks
+*/
+const int nextP0[N] = {1, 2, -1, -1};
+const int nextP1[N] = {0, 2, -1, -1};
+const int nextP2[N] = {0, 1,  3, -1};
+const int nextP3[N] = {0, -1, -1, -1};
+
+const int options[N] = {2, 2, 3, 1};
+const int transitions[N][N] = {
+    {0, 1, 2, -1},
+    {0, 1, 2, -1},
+    {0, 1, 2,  3},
+    {0, 3, -1, -1}
+};
+
+// for objective
+const int HORIZON = 60;
+const int MIN_GREEN = 4;
+clock time;
+hybrid clock Q;
+
+// helpers
+int get_phase_id(bool is_active[N]){
+    int i = 0; 
+    for (i=0; i&lt;N; ++i){
+        if (is_active[i]){
+            return i;        
+        }    
+    }
+    return -1;
+}
+
+</declaration>
+	<template>
+		<name>UniformAdder</name>
+		<parameter>int&amp; counts[L]</parameter>
+		<location id="id0" x="0" y="0">
+			<label kind="exponentialrate" x="-17" y="17">rAdd</label>
+		</location>
+		<init ref="id0"/>
+		<transition controllable="false">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="select" x="-51" y="-119">dir: int[0,L-1]</label>
+			<label kind="assignment" x="-51" y="-102">counts[dir]++</label>
+			<label kind="comments" x="-42" y="-187">0: Left
+1: Forward
+2: Right</label>
+			<nail x="34" y="-68"/>
+			<nail x="-34" y="-68"/>
+		</transition>
+	</template>
+	<template>
+		<name>ProbAdder</name>
+		<parameter>int&amp; counts[L], const int&amp; prob[L]</parameter>
+		<declaration>clock y;</declaration>
+		<location id="id1" x="0" y="-34">
+			<label kind="invariant" x="-10" y="-17">y &lt;=1</label>
+		</location>
+		<branchpoint id="id2" x="0" y="-136"/>
+		<init ref="id1"/>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="probability" x="-365" y="-59">100 - sum(i:int[0,L-1])(prob[i])</label>
+			<nail x="-102" y="-136"/>
+			<nail x="-102" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="select" x="119" y="-93">i: int[0,L-1]</label>
+			<label kind="assignment" x="119" y="-76">counts[i]++</label>
+			<label kind="probability" x="119" y="-59">prob[i]</label>
+			<nail x="102" y="-136"/>
+			<nail x="102" y="-34"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="17" y="-110">y==1</label>
+			<label kind="assignment" x="17" y="-93">y=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>RemoverA</name>
+		<parameter>bool&amp; is_active[N]</parameter>
+		<location id="id3" x="0" y="0">
+			<label kind="exponentialrate" x="-17" y="34">rRemA</label>
+		</location>
+		<init ref="id3"/>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-34" y="-153">is_active[0] &amp;&amp; x&gt;=2 &amp;&amp; A[1]&gt;0</label>
+			<label kind="assignment" x="-34" y="-136">A[1]--</label>
+			<label kind="comments" x="-34" y="-170">Forward</label>
+			<nail x="34" y="-102"/>
+			<nail x="-34" y="-102"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id3"/>
+			<label kind="guard" x="102" y="51">is_active[0] &amp;&amp; x&gt;=2 &amp;&amp; A[2]&gt;0</label>
+			<label kind="assignment" x="102" y="68">A[2]--</label>
+			<label kind="comments" x="110" y="26">Right</label>
+			<nail x="68" y="68"/>
+			<nail x="102" y="0"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-323" y="51">is_active[1] &amp;&amp; x&gt;=2 &amp;&amp; A[0]&gt;0</label>
+			<label kind="assignment" x="-323" y="68">A[0]--</label>
+			<label kind="comments" x="-323" y="25">Left</label>
+			<nail x="-68" y="68"/>
+			<nail x="-102" y="0"/>
+		</transition>
+	</template>
+	<template>
+		<name>RemoverB</name>
+		<parameter>bool&amp; is_active[N]</parameter>
+		<location id="id4" x="0" y="0">
+			<label kind="exponentialrate" x="-17" y="34">rRemB</label>
+		</location>
+		<init ref="id4"/>
+		<transition controllable="false">
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-34" y="-153">is_active[2] &amp;&amp; x&gt;=2 &amp;&amp; B[1]&gt;0</label>
+			<label kind="assignment" x="-34" y="-136">B[1]--</label>
+			<label kind="comments" x="-34" y="-170">Forward</label>
+			<nail x="34" y="-102"/>
+			<nail x="-34" y="-102"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="guard" x="102" y="68">is_active[2] &amp;&amp; x&gt;=2 &amp;&amp; B[2]&gt;0</label>
+			<label kind="assignment" x="102" y="85">B[2]--</label>
+			<label kind="comments" x="102" y="42">Right</label>
+			<nail x="68" y="68"/>
+			<nail x="102" y="0"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-408" y="68">(is_active[2] || is_active[3]) &amp;&amp; x&gt;=2 &amp;&amp; B[0]&gt;0</label>
+			<label kind="assignment" x="-408" y="85">B[0]--</label>
+			<label kind="comments" x="-399" y="42">Left</label>
+			<nail x="-68" y="68"/>
+			<nail x="-102" y="0"/>
+		</transition>
+	</template>
+	<template>
+		<name>SumSqObjective</name>
+		<location id="id5" x="0" y="0">
+			<label kind="invariant" x="-10" y="17">Q'==sum(i:int[0,L-1])(A[i] * A[i] + B[i] * B[i])</label>
+		</location>
+		<init ref="id5"/>
+	</template>
+	<template>
+		<name>SumSqPressObjective</name>
+		<location id="id6" x="0" y="0">
+			<label kind="invariant" x="-10" y="17">Q'==sum(i:int[0,L-1])(A[i]*A[i] + B[i]*B[i])
++ (sum(i:int[0,L-1])(A[i]) - sum(i:int[0,L-1])(B[i]))
+* (sum(i:int[0,L-1])(A[i]) - sum(i:int[0,L-1])(B[i]))</label>
+			<label kind="comments" x="-8" y="-110">Sum squares of the number of 
+cars plus the pressure term 
+which penalizes big differences 
+between lanes</label>
+		</location>
+		<init ref="id6"/>
+	</template>
+	<template>
+		<name>SumObjective</name>
+		<location id="id7" x="0" y="0">
+			<label kind="invariant" x="-10" y="17">Q'==sum(i:int[0,L-1])(A[i] + B[i])</label>
+		</location>
+		<init ref="id7"/>
+	</template>
+	<template>
+		<name>Phase</name>
+		<parameter>int this_id, const int&amp; next_id[N], const int n_options, bool&amp; is_active[N]</parameter>
+		<declaration>clock y;</declaration>
+		<location id="id8" x="-102" y="-68">
+			<name x="-161" y="-85">Turn</name>
+			<label kind="invariant" x="-161" y="-102">y&lt;=1</label>
+		</location>
+		<location id="id9" x="-102" y="68">
+			<name x="-204" y="85">ExtendOrStop</name>
+			<committed/>
+		</location>
+		<location id="id10" x="272" y="-68">
+			<name x="297" y="-85">WaitForSync</name>
+		</location>
+		<location id="id11" x="68" y="-170">
+			<name x="25" y="-212">DecideStart</name>
+			<committed/>
+		</location>
+		<init ref="id11"/>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="guard" x="110" y="-195">!is_active[this_id]</label>
+			<nail x="272" y="-170"/>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-102" y="-195">is_active[this_id]</label>
+			<nail x="-102" y="-170"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-68" y="-59">phaseChan[this_id]?</label>
+			<label kind="assignment" x="-68" y="-42">x=0,y=0,
+is_active[this_id]=!is_active[this_id]</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="select" x="-68" y="93">i: int[0, n_options-1]</label>
+			<label kind="guard" x="-68" y="76">x&gt;=MIN_GREEN</label>
+			<label kind="synchronisation" x="-68" y="110">phaseChan[next_id[i]]!</label>
+			<label kind="assignment" x="-68" y="127">is_active[this_id]=!is_active[this_id]</label>
+			<nail x="272" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<nail x="-170" y="34"/>
+			<nail x="-170" y="-34"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-136" y="-17">y==1</label>
+			<label kind="assignment" x="-136" y="0">y=0</label>
+		</transition>
+	</template>
+	<system>// Baseline system
+// system Control, East, South, West, North, Objective;
+
+// System 5, each phase is an instance of Phase template with syncronization channels
+//P1 = Phase(0, nextP1, options[0]);
+//P2 = Phase(1, nextP2, options[1]);
+//system P1, P2, East, South, West, North, Objective;
+
+// System 6, each phase is an instance of Phase template with syncronization channels
+P0 = Phase(0, nextP0, options[0], is_active);
+P1 = Phase(1, nextP1, options[1], is_active);
+P2 = Phase(2, nextP2, options[2], is_active);
+P3 = Phase(3, nextP3, options[3], is_active);
+
+AddA = ProbAdder(A, p_move_add);
+AddB = ProbAdder(B, p_move_add);
+RemA = RemoverA(is_active);
+RemB = RemoverB(is_active);
+
+//system P0, P1, P2, P3; // for deadlock check
+system P0, P1, P2, P3, AddA, AddB, RemA, RemB, SumSqObjective;</system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy opt = minE(Q) [&lt;=HORIZON]:&lt;&gt;time&gt;=HORIZON</formula>
+			<comment>strategy opt = minE(Q) [&lt;=HORIZON]{Control.location}-&gt;{queueE, queueS, isP1}:&lt;&gt;time&gt;=HORIZON // Broken due to collectPossibleIndex()::DOT</comment>
+			<result outcome="success" type="quality" timestamp="2021-04-12 08:18:12 +0200">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+				<option key="--diagnostic" value="-1"/>
+				<option key="--backwards-order" value="1"/>
+				<option key="--priority-order" value="0"/>
+				<option key="--generate-strategy" value="2"/>
+				<option key="--extrapolation" value="0"/>
+				<option key="--hashtable-size" value="27"/>
+				<option key="--filter" value="0"/>
+				<option key="--learning-method" value="4"/>
+				<option key="--good-runs" value="200"/>
+				<option key="--total-runs" value="500"/>
+				<option key="--runs-pr-state" value="100"/>
+				<option key="--eval-runs" value="100"/>
+				<option key="--max-iterations" value="30"/>
+				<option key="--max-imitation" value="5"/>
+				<option key="--reset-no-better" value="10"/>
+				<option key="--max-reset-learning" value="3"/>
+				<option key="--qlearning-alpha" value="2"/>
+				<option key="--split-upper-t" value="1.75"/>
+				<option key="--split-lower-t" value="0.15"/>
+				<option key="--split-ks" value="0.25"/>
+				<option key="--split-filter-rate" value="0.02"/>
+				<option key="--split-filter-val" value="0.99"/>
+				<option key="--discount" value="0.99"/>
+				<option key="--random-search-limit" value="0.5"/>
+				<option key="--deterministic-search-limit" value="0.5"/>
+				<option key="--indifference-scale" value="0.005"/>
+				<option key="--indifference-smoothing" value="10"/>
+				<option key="--lower-delta" value="0.01"/>
+				<option key="--upper-delta" value="0.01"/>
+				<option key="--alpha" value="0.05"/>
+				<option key="--beta" value="0.05"/>
+				<option key="--epsilon" value="0.05"/>
+				<option key="--u0" value="0.9"/>
+				<option key="--u1" value="1.1"/>
+				<option key="--histogram-bar-width" value="0.0"/>
+				<option key="--histogram-bar-count" value="0"/>
+				<option key="--resolution" value="4000"/>
+				<option key="--discretization" value="0.01"/>
+				<option key="--truncation-error" value="0.01"/>
+				<option key="--truncation-time-error" value="0.01"/>
+				
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=HORIZON;500] (max: Q)</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="14591.2 ± 364.18 (95% CI)" timestamp="2021-04-12 08:18:12 +0200">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+				<option key="--diagnostic" value="-1"/>
+				<option key="--backwards-order" value="1"/>
+				<option key="--priority-order" value="0"/>
+				<option key="--generate-strategy" value="2"/>
+				<option key="--extrapolation" value="0"/>
+				<option key="--hashtable-size" value="27"/>
+				<option key="--filter" value="0"/>
+				<option key="--learning-method" value="4"/>
+				<option key="--good-runs" value="200"/>
+				<option key="--total-runs" value="500"/>
+				<option key="--runs-pr-state" value="100"/>
+				<option key="--eval-runs" value="100"/>
+				<option key="--max-iterations" value="30"/>
+				<option key="--max-imitation" value="5"/>
+				<option key="--reset-no-better" value="10"/>
+				<option key="--max-reset-learning" value="3"/>
+				<option key="--qlearning-alpha" value="2"/>
+				<option key="--split-upper-t" value="1.75"/>
+				<option key="--split-lower-t" value="0.15"/>
+				<option key="--split-ks" value="0.25"/>
+				<option key="--split-filter-rate" value="0.02"/>
+				<option key="--split-filter-val" value="0.99"/>
+				<option key="--discount" value="0.99"/>
+				<option key="--random-search-limit" value="0.5"/>
+				<option key="--deterministic-search-limit" value="0.5"/>
+				<option key="--indifference-scale" value="0.005"/>
+				<option key="--indifference-smoothing" value="10"/>
+				<option key="--lower-delta" value="0.01"/>
+				<option key="--upper-delta" value="0.01"/>
+				<option key="--alpha" value="0.05"/>
+				<option key="--beta" value="0.05"/>
+				<option key="--epsilon" value="0.05"/>
+				<option key="--u0" value="0.9"/>
+				<option key="--u1" value="1.1"/>
+				<option key="--histogram-bar-width" value="0.0"/>
+				<option key="--histogram-bar-count" value="0"/>
+				<option key="--resolution" value="4000"/>
+				<option key="--discretization" value="0.01"/>
+				<option key="--truncation-error" value="0.01"/>
+				<option key="--truncation-time-error" value="0.01"/>
+				
+				<plot title="Probability Density Distribution" xaxis="max: Q" yaxis="probability density">
+					<series title="density" type="b(1180.536690)" color="0x0000ff" encoding="csv">4797.933208923077,8.470723598921015E-6
+5978.469899155304,1.5247302761430889E-5
+7159.006589386708,1.5247302761430889E-5
+8339.543279611418,3.89653287144803E-5
+9520.079969843646,6.437749933946173E-5
+10700.616660078673,7.45423679286605E-5
+11881.153350309256,1.0845100723050132E-4
+13061.690040540547,9.317795963925769E-5
+14242.226730771128,1.1185832884854694E-4
+15422.76342100171,6.6071644368341E-5
+16603.300111238383,5.929506531787633E-5
+17783.836801468966,5.929506531787633E-5
+18964.373491699545,5.760092071829349E-5
+20144.910181930838,3.388289441110938E-5
+21325.446872161418,1.863559206473187E-5
+22505.983562392,6.776578873249074E-6
+23686.520252628674,1.6941447200742361E-6
+24867.056942859253,5.082434166782881E-6
+26047.593633089837,0.0
+27228.13032332042,5.082434166782881E-6
+28408.66701355171,0.0
+29589.203703788382,1.6941447200742361E-6
+30769.740394018965,1.6941447200742361E-6
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14591.222631579256,0.0
+14591.222631579256,1.1185832884854694E-4
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1180.5, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4797.9, 31950]
+Mean estimate of displayed sample: 14591 ± 364.18 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="max: Q" yaxis="probability">
+					<series title="probability" type="b(1180.536690)" color="0x0000ff" encoding="csv">4797.933208923077,0.01
+5978.469899155304,0.018000000000000002
+7159.006589386708,0.018000000000000002
+8339.543279611418,0.046
+9520.079969843646,0.07600000000000001
+10700.616660078673,0.088
+11881.153350309256,0.128
+13061.690040540547,0.11
+14242.226730771128,0.132
+15422.76342100171,0.07800000000000001
+16603.300111238383,0.07
+17783.836801468966,0.07
+18964.373491699545,0.068
+20144.910181930838,0.04
+21325.446872161418,0.022
+22505.983562392,0.008
+23686.520252628674,0.002
+24867.056942859253,0.006
+26047.593633089837,0.0
+27228.13032332042,0.006
+28408.66701355171,0.0
+29589.203703788382,0.002
+30769.740394018965,0.002
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14591.222631579256,0.0
+14591.222631579256,0.132
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1180.5, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4797.9, 31950]
+Mean estimate of displayed sample: 14591 ± 364.18 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="max: Q" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">4797.933208923077,0.0
+5978.469899155304,0.01
+7159.006589386708,0.028
+8339.543279611418,0.046
+9520.079969843646,0.092
+10700.616660078673,0.168
+11881.153350309256,0.256
+13061.690040540547,0.384
+14242.226730771128,0.494
+15422.76342100171,0.626
+16603.300111238383,0.704
+17783.836801468966,0.774
+18964.373491699545,0.8440000000000001
+20144.910181930838,0.912
+21325.446872161418,0.9520000000000001
+22505.983562392,0.974
+23686.520252628674,0.982
+24867.056942859253,0.984
+26047.593633089837,0.99
+27228.13032332042,0.99
+28408.66701355171,0.996
+29589.203703788382,0.996
+30769.740394018965,0.998
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14591.222631579256,0.0
+14591.222631579256,1.0
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1180.5, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4797.9, 31950]
+Mean estimate of displayed sample: 14591 ± 364.18 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: Q" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">4797.933208923077,0.0073506244708472545
+5978.469899155304,0.023181400527165264
+7159.006589386708,0.04653336884170578
+8339.543279611418,0.06822545047709097
+9520.079969843646,0.12080705490541878
+10700.616660078673,0.2037110425744345
+11881.153350309256,0.2966270166017026
+13061.690040540547,0.42821478964953336
+14242.226730771128,0.5387469741344144
+15422.76342100171,0.6685574926764946
+16603.300111238383,0.7437043946433043
+17783.836801468966,0.8099477388450771
+18964.373491699545,0.8746925684400462
+20144.910181930838,0.9353315579517952
+21325.446872161418,0.9690068564978173
+22505.983562392,0.9860850834558177
+23686.520252628674,0.9917370544050624
+24867.056942859253,0.9930676842395814
+26047.593633089837,0.9967453144383572
+27228.13032332042,0.9967453144383572
+28408.66701355171,0.9995152251301065
+29589.203703788382,0.9995152251301065
+30769.740394018965,0.9999494047503481
+
+					</series>
+					<series title="upper limit" type="k" color="0xdd0000" encoding="csv">4797.933208923077,0.0
+5978.469899155304,0.003254723087082643
+7159.006589386708,0.015390618125156177
+8339.543279611418,0.029380187780076086
+9520.079969843646,0.06814332273841248
+10700.616660078673,0.13627381662269997
+11881.153350309256,0.21828587901587307
+13061.690040540547,0.3411654347722071
+14242.226730771128,0.44932438551259707
+15422.76342100171,0.5819431394048162
+16603.300111238383,0.6618637712685317
+17783.836801468966,0.7347766507339698
+18964.373491699545,0.8091738967084329
+20144.910181930838,0.8836648396632366
+21325.446872161418,0.9294192383849496
+22505.983562392,0.9559495669490934
+23686.520252628674,0.9661063381379191
+24867.056942859253,0.9687180116055211
+26047.593633089837,0.9768186365989997
+27228.13032332042,0.9768186365989997
+28408.66701355171,0.9856259227591793
+29589.203703788382,0.9856259227591793
+30769.740394018965,0.9889075325329869
+
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">4797.933208923077,0.0
+5978.469899155304,0.01
+7159.006589386708,0.028
+8339.543279611418,0.046
+9520.079969843646,0.092
+10700.616660078673,0.168
+11881.153350309256,0.256
+13061.690040540547,0.384
+14242.226730771128,0.494
+15422.76342100171,0.626
+16603.300111238383,0.704
+17783.836801468966,0.774
+18964.373491699545,0.8440000000000001
+20144.910181930838,0.912
+21325.446872161418,0.9520000000000001
+22505.983562392,0.974
+23686.520252628674,0.982
+24867.056942859253,0.984
+26047.593633089837,0.99
+27228.13032332042,0.99
+28408.66701355171,0.996
+29589.203703788382,0.996
+30769.740394018965,0.998
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14591.222631579256,0.0
+14591.222631579256,1.0
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1180.5, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4797.9, 31950]
+Mean estimate of displayed sample: 14591 ± 364.18 (95% CI)</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="max: Q" yaxis="count">
+					<series title="count" type="b(1180.536690)" color="0x0000ff" encoding="csv">4797.933208923077,5.0
+5978.469899155304,9.0
+7159.006589386708,9.0
+8339.543279611418,23.0
+9520.079969843646,38.0
+10700.616660078673,44.0
+11881.153350309256,64.0
+13061.690040540547,55.0
+14242.226730771128,66.0
+15422.76342100171,39.0
+16603.300111238383,35.0
+17783.836801468966,35.0
+18964.373491699545,34.0
+20144.910181930838,20.0
+21325.446872161418,11.0
+22505.983562392,4.0
+23686.520252628674,1.0
+24867.056942859253,3.0
+26047.593633089837,0.0
+27228.13032332042,3.0
+28408.66701355171,0.0
+29589.203703788382,1.0
+30769.740394018965,1.0
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14591.222631579256,0.0
+14591.222631579256,66.0
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1180.5, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4797.9, 31950]
+Mean estimate of displayed sample: 14591 ± 364.18 (95% CI)</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>E[&lt;=HORIZON;500] (max: Q) under opt</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="14091.4 ± 356.316 (95% CI)" timestamp="2021-04-12 08:18:12 +0200">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+				<option key="--diagnostic" value="-1"/>
+				<option key="--backwards-order" value="1"/>
+				<option key="--priority-order" value="0"/>
+				<option key="--generate-strategy" value="2"/>
+				<option key="--extrapolation" value="0"/>
+				<option key="--hashtable-size" value="27"/>
+				<option key="--filter" value="0"/>
+				<option key="--learning-method" value="4"/>
+				<option key="--good-runs" value="200"/>
+				<option key="--total-runs" value="500"/>
+				<option key="--runs-pr-state" value="100"/>
+				<option key="--eval-runs" value="100"/>
+				<option key="--max-iterations" value="30"/>
+				<option key="--max-imitation" value="5"/>
+				<option key="--reset-no-better" value="10"/>
+				<option key="--max-reset-learning" value="3"/>
+				<option key="--qlearning-alpha" value="2"/>
+				<option key="--split-upper-t" value="1.75"/>
+				<option key="--split-lower-t" value="0.15"/>
+				<option key="--split-ks" value="0.25"/>
+				<option key="--split-filter-rate" value="0.02"/>
+				<option key="--split-filter-val" value="0.99"/>
+				<option key="--discount" value="0.99"/>
+				<option key="--random-search-limit" value="0.5"/>
+				<option key="--deterministic-search-limit" value="0.5"/>
+				<option key="--indifference-scale" value="0.005"/>
+				<option key="--indifference-smoothing" value="10"/>
+				<option key="--lower-delta" value="0.01"/>
+				<option key="--upper-delta" value="0.01"/>
+				<option key="--alpha" value="0.05"/>
+				<option key="--beta" value="0.05"/>
+				<option key="--epsilon" value="0.05"/>
+				<option key="--u0" value="0.9"/>
+				<option key="--u1" value="1.1"/>
+				<option key="--histogram-bar-width" value="0.0"/>
+				<option key="--histogram-bar-count" value="0"/>
+				<option key="--resolution" value="4000"/>
+				<option key="--discretization" value="0.01"/>
+				<option key="--truncation-error" value="0.01"/>
+				<option key="--truncation-time-error" value="0.01"/>
+				
+				<plot title="Probability Density Distribution" xaxis="max: Q" yaxis="probability density">
+					<series title="density" type="b(1014.948202)" color="0x0000ff" encoding="csv">4178.554234317191,1.9705439180088717E-6
+5193.502436602595,7.882175672277718E-6
+6208.450638880482,1.970543918008872E-5
+7223.398841166708,3.152870279648903E-5
+8238.347043444595,4.729305398720685E-5
+9253.295245729998,7.48806686486199E-5
+10268.243448005418,7.291012483100181E-5
+11283.19165028742,1.0250451896305736E-4
+12298.13985256871,1.0051651618544164E-4
+13313.088054850708,8.670393229382955E-5
+14328.036257132,7.291012483100181E-5
+15342.984459414,8.867447602171963E-5
+16357.932661701383,5.7145773730011995E-5
+17372.880863983384,6.502794938585075E-5
+18387.829066264672,5.7145773730011995E-5
+19402.777268546673,3.349924661410714E-5
+20417.725470827965,1.970543918008872E-5
+21432.673673109963,2.1675983388014782E-5
+22447.621875391964,1.1823263560423245E-5
+23462.570077673256,5.9116317396983375E-6
+24477.518279955257,1.9705439180088717E-6
+25492.466482236545,1.9705439180088717E-6
+26507.414684518546,1.9705439180088717E-6
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14091.397630313673,0.0
+14091.397630313673,1.0250451896305736E-4
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1014.9, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4178.6, 27522]
+Mean estimate of displayed sample: 14091 ± 356.32 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="max: Q" yaxis="probability">
+					<series title="probability" type="b(1014.948202)" color="0x0000ff" encoding="csv">4178.554234317191,0.002
+5193.502436602595,0.008
+6208.450638880482,0.02
+7223.398841166708,0.032
+8238.347043444595,0.048
+9253.295245729998,0.07600000000000001
+10268.243448005418,0.07400000000000001
+11283.19165028742,0.10400000000000001
+12298.13985256871,0.10200000000000001
+13313.088054850708,0.088
+14328.036257132,0.07400000000000001
+15342.984459414,0.09
+16357.932661701383,0.058
+17372.880863983384,0.066
+18387.829066264672,0.058
+19402.777268546673,0.034
+20417.725470827965,0.02
+21432.673673109963,0.022
+22447.621875391964,0.012
+23462.570077673256,0.006
+24477.518279955257,0.002
+25492.466482236545,0.002
+26507.414684518546,0.002
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14091.397630313673,0.0
+14091.397630313673,0.10400000000000001
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1014.9, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4178.6, 27522]
+Mean estimate of displayed sample: 14091 ± 356.32 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="max: Q" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">4178.554234317191,0.0
+5193.502436602595,0.002
+6208.450638880482,0.01
+7223.398841166708,0.03
+8238.347043444595,0.062
+9253.295245729998,0.11
+10268.243448005418,0.186
+11283.19165028742,0.26
+12298.13985256871,0.364
+13313.088054850708,0.466
+14328.036257132,0.554
+15342.984459414,0.628
+16357.932661701383,0.718
+17372.880863983384,0.776
+18387.829066264672,0.8420000000000001
+19402.777268546673,0.9
+20417.725470827965,0.934
+21432.673673109963,0.9540000000000001
+22447.621875391964,0.976
+23462.570077673256,0.988
+24477.518279955257,0.994
+25492.466482236545,0.996
+26507.414684518546,0.998
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14091.397630313673,0.0
+14091.397630313673,1.0
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1014.9, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4178.6, 27522]
+Mean estimate of displayed sample: 14091 ± 356.32 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: Q" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">4178.554234317191,0.0073506244708472545
+5193.502436602595,0.011092505659890705
+6208.450638880482,0.023181400527165264
+7223.398841166708,0.048998228234800725
+8238.347043444595,0.0868525954611668
+9253.295245729998,0.14076586321324366
+10268.243448005418,0.22292822012933683
+11283.19165028742,0.30079579398064493
+12298.13985256871,0.4078797723082146
+13313.088054850708,0.5108156154205953
+14328.036257132,0.59813831821129
+15342.984459414,0.6704997469624058
+16357.932661701383,0.7570520831117655
+17372.880863983384,0.8118208214043124
+18387.829066264672,0.872869262519688
+19402.777268546673,0.9248642152326559
+20417.725470827965,0.9541366472303707
+21432.673673109963,0.9706198504128016
+22447.621875391964,0.9875387845678025
+23462.570077673256,0.9955838553763309
+24477.518279955257,0.9987609559460302
+25492.466482236545,0.9995152251301065
+26507.414684518546,0.9999494047503481
+
+					</series>
+					<series title="upper limit" type="k" color="0xdd0000" encoding="csv">4178.554234317191,0.0
+5193.502436602595,5.063433417913312E-5
+6208.450638880482,0.003254723087082643
+7223.398841166708,0.016886011800236713
+8238.347043444595,0.0425110921902955
+9253.295245729998,0.08394907315286704
+10268.243448005418,0.15283512395082616
+11283.19165028742,0.2220689149028842
+12298.13985256871,0.3217389538256458
+13313.088054850708,0.4215886378477506
+14328.036257132,0.5092195875012523
+15342.984459414,0.5839770000598636
+16357.932661701383,0.6763479895918137
+17372.880863983384,0.736879340827846
+18387.829066264672,0.807022074403755
+19402.777268546673,0.87029094227245
+20417.725470827965,0.9085571063329212
+21432.673673109963,0.9317745882491429
+22447.621875391964,0.9584523857015687
+23462.570077673256,0.9740650982353419
+24477.518279955257,0.9825663526952516
+25492.466482236545,0.9856259227591793
+26507.414684518546,0.9889075325329869
+
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">4178.554234317191,0.0
+5193.502436602595,0.002
+6208.450638880482,0.01
+7223.398841166708,0.03
+8238.347043444595,0.062
+9253.295245729998,0.11
+10268.243448005418,0.186
+11283.19165028742,0.26
+12298.13985256871,0.364
+13313.088054850708,0.466
+14328.036257132,0.554
+15342.984459414,0.628
+16357.932661701383,0.718
+17372.880863983384,0.776
+18387.829066264672,0.8420000000000001
+19402.777268546673,0.9
+20417.725470827965,0.934
+21432.673673109963,0.9540000000000001
+22447.621875391964,0.976
+23462.570077673256,0.988
+24477.518279955257,0.994
+25492.466482236545,0.996
+26507.414684518546,0.998
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14091.397630313673,0.0
+14091.397630313673,1.0
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1014.9, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4178.6, 27522]
+Mean estimate of displayed sample: 14091 ± 356.32 (95% CI)</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="max: Q" yaxis="count">
+					<series title="count" type="b(1014.948202)" color="0x0000ff" encoding="csv">4178.554234317191,1.0
+5193.502436602595,4.0
+6208.450638880482,10.0
+7223.398841166708,16.0
+8238.347043444595,24.0
+9253.295245729998,38.0
+10268.243448005418,37.0
+11283.19165028742,52.0
+12298.13985256871,51.0
+13313.088054850708,44.0
+14328.036257132,37.0
+15342.984459414,45.0
+16357.932661701383,29.0
+17372.880863983384,33.0
+18387.829066264672,29.0
+19402.777268546673,17.0
+20417.725470827965,10.0
+21432.673673109963,11.0
+22447.621875391964,6.0
+23462.570077673256,3.0
+24477.518279955257,1.0
+25492.466482236545,1.0
+26507.414684518546,1.0
+
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">14091.397630313673,0.0
+14091.397630313673,52.0
+
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1014.9, bucket count=23
+Runs: 500 in total, 500 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [4178.6, 27522]
+Mean estimate of displayed sample: 14091 ± 356.32 (95% CI)</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=HORIZON] {A, B, -8+is_active[0], -6+is_active[1], -4+is_active[2], -2+is_active[3]}
+</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2021-04-12 08:18:12 +0200">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+				<option key="--diagnostic" value="-1"/>
+				<option key="--backwards-order" value="1"/>
+				<option key="--priority-order" value="0"/>
+				<option key="--generate-strategy" value="2"/>
+				<option key="--extrapolation" value="0"/>
+				<option key="--hashtable-size" value="27"/>
+				<option key="--filter" value="0"/>
+				<option key="--learning-method" value="4"/>
+				<option key="--good-runs" value="200"/>
+				<option key="--total-runs" value="500"/>
+				<option key="--runs-pr-state" value="100"/>
+				<option key="--eval-runs" value="100"/>
+				<option key="--max-iterations" value="30"/>
+				<option key="--max-imitation" value="5"/>
+				<option key="--reset-no-better" value="10"/>
+				<option key="--max-reset-learning" value="3"/>
+				<option key="--qlearning-alpha" value="2"/>
+				<option key="--split-upper-t" value="1.75"/>
+				<option key="--split-lower-t" value="0.15"/>
+				<option key="--split-ks" value="0.25"/>
+				<option key="--split-filter-rate" value="0.02"/>
+				<option key="--split-filter-val" value="0.99"/>
+				<option key="--discount" value="0.99"/>
+				<option key="--random-search-limit" value="0.5"/>
+				<option key="--deterministic-search-limit" value="0.5"/>
+				<option key="--indifference-scale" value="0.005"/>
+				<option key="--indifference-smoothing" value="10"/>
+				<option key="--lower-delta" value="0.01"/>
+				<option key="--upper-delta" value="0.01"/>
+				<option key="--alpha" value="0.05"/>
+				<option key="--beta" value="0.05"/>
+				<option key="--epsilon" value="0.05"/>
+				<option key="--u0" value="0.9"/>
+				<option key="--u1" value="1.1"/>
+				<option key="--histogram-bar-width" value="0.0"/>
+				<option key="--histogram-bar-count" value="0"/>
+				<option key="--resolution" value="4000"/>
+				<option key="--discretization" value="0.01"/>
+				<option key="--truncation-error" value="0.01"/>
+				<option key="--truncation-time-error" value="0.01"/>
+				
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="A[0]" type="l" color="0xff0000" encoding="csv">0.0,0.0
+0.0,3.0
+2.0,3.0
+2.0,4.0
+3.0,4.0
+3.0,5.0
+6.553548217194561,5.0
+6.553548217194561,4.0
+24.0,4.0
+24.0,5.0
+24.23418830423045,5.0
+24.23418830423045,4.0
+26.969285608723684,4.0
+26.969285608723684,3.0
+27.287389639627374,3.0
+27.287389639627374,2.0
+28.431795677561002,2.0
+28.431795677561002,1.0
+28.450925159314394,1.0
+28.450925159314394,0.0
+30.0,0.0
+30.0,1.0
+40.0,1.0
+40.0,2.0
+50.0,2.0
+50.0,3.0
+55.75854319320375,3.0
+55.75854319320375,2.0
+56.3427486242954,2.0
+56.3427486242954,1.0
+58.0,1.0
+58.0,2.0
+59.0,2.0
+59.0,3.0
+60.000002,3.0
+
+					</series>
+					<series title="A[1]" type="l" color="0xff9900" encoding="csv">0.0,0.0
+0.0,5.0
+2.8664603042771244,5.0
+2.8664603042771244,4.0
+6.0,4.0
+6.0,5.0
+11.538698593945297,5.0
+11.538698593945297,4.0
+12.084739520595921,4.0
+12.084739520595921,3.0
+15.0,3.0
+15.0,4.0
+16.0,4.0
+16.0,5.0
+17.0,5.0
+17.0,6.0
+20.0,6.0
+20.0,7.0
+32.0,7.0
+32.0,8.0
+34.0,8.0
+34.0,9.0
+37.0,9.0
+37.0,10.0
+39.790461618333595,10.0
+39.790461618333595,9.0
+40.520210704644406,9.0
+40.520210704644406,8.0
+43.0,8.0
+43.0,9.0
+45.0,9.0
+45.0,10.0
+47.0,10.0
+47.0,11.0
+60.0,11.0
+60.000002,12.0
+
+					</series>
+					<series title="A[2]" type="l" color="0xccff00" encoding="csv">0.0,0.0
+0.0,3.0
+7.0,3.0
+7.0,4.0
+38.0,4.0
+38.0,5.0
+60.000002,5.0
+
+					</series>
+					<series title="B[0]" type="l" color="0x33ff00" encoding="csv">0.0,0.0
+0.0,1.0
+5.0,1.0
+5.0,2.0
+8.0,2.0
+8.0,3.0
+15.0,3.0
+15.0,4.0
+20.67363359839592,4.0
+20.67363359839592,3.0
+21.93180110554888,3.0
+21.93180110554888,2.0
+23.0,2.0
+23.0,3.0
+31.285777794386625,3.0
+31.285777794386625,2.0
+35.75035620995968,2.0
+35.75035620995968,1.0
+36.67867325986033,1.0
+36.67867325986033,0.0
+51.0,0.0
+51.0,1.0
+51.31489888576289,1.0
+51.31489888576289,0.0
+60.000002,0.0
+
+					</series>
+					<series title="B[1]" type="l" color="0x00ff66" encoding="csv">0.0,0.0
+0.0,7.0
+3.0,7.0
+3.0,8.0
+7.0,8.0
+7.0,9.0
+14.0,9.0
+14.0,10.0
+16.0,10.0
+16.0,11.0
+19.0,11.0
+19.0,12.0
+22.0,12.0
+22.0,13.0
+27.0,13.0
+27.0,14.0
+36.0,14.0
+36.0,15.0
+39.0,15.0
+39.0,16.0
+42.0,16.0
+42.0,17.0
+44.0,17.0
+44.0,18.0
+49.0,18.0
+49.0,19.0
+53.0,19.0
+53.0,20.0
+55.0,20.0
+55.0,21.0
+60.000002,21.0
+
+					</series>
+					<series title="B[2]" type="l" color="0x00ffff" encoding="csv">0.0,0.0
+26.0,0.0
+26.0,1.0
+37.0,1.0
+37.0,2.0
+40.0,2.0
+40.0,3.0
+44.34626054647995,3.0
+44.34626054647995,2.0
+50.0,2.0
+50.0,3.0
+60.000002,3.0
+
+					</series>
+					<series title="-8 + is_active[0]" type="l" color="0x0066ff" encoding="csv">0.0,0.0
+0.0,-7.0
+4.0,-7.0
+4.0,-8.0
+8.0,-8.0
+8.0,-7.0
+14.0,-7.0
+14.0,-8.0
+37.0,-8.0
+37.0,-7.0
+41.0,-7.0
+41.0,-8.0
+57.0,-8.0
+57.0,-7.0
+60.000002,-7.0
+
+					</series>
+					<series title="-6 + is_active[1]" type="l" color="0x3300ff" encoding="csv">0.0,0.0
+0.0,-6.0
+4.0,-6.0
+4.0,-5.0
+8.0,-5.0
+8.0,-6.0
+14.0,-6.0
+14.0,-5.0
+18.0,-5.0
+18.0,-6.0
+22.0,-6.0
+22.0,-5.0
+29.0,-5.0
+29.0,-6.0
+45.0,-6.0
+45.0,-5.0
+49.0,-5.0
+49.0,-6.0
+53.0,-6.0
+53.0,-5.0
+57.0,-5.0
+57.0,-6.0
+60.000002,-6.0
+
+					</series>
+					<series title="-4 + is_active[2]" type="l" color="0xcc00ff" encoding="csv">0.0,0.0
+0.0,-4.0
+18.0,-4.0
+18.0,-3.0
+22.0,-3.0
+22.0,-4.0
+29.0,-4.0
+29.0,-3.0
+33.0,-3.0
+33.0,-4.0
+41.0,-4.0
+41.0,-3.0
+45.0,-3.0
+45.0,-4.0
+49.0,-4.0
+49.0,-3.0
+53.0,-3.0
+53.0,-4.0
+60.000002,-4.0
+
+					</series>
+					<series title="-2 + is_active[3]" type="l" color="0xff0099" encoding="csv">0.0,0.0
+0.0,-2.0
+33.0,-2.0
+33.0,-1.0
+37.0,-1.0
+37.0,-2.0
+60.000002,-2.0
+
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=HORIZON] {A, B, -8+is_active[0], -6+is_active[1], -4+is_active[2], -2+is_active[3]} under opt</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2021-04-12 08:18:12 +0200">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+				<option key="--diagnostic" value="-1"/>
+				<option key="--backwards-order" value="1"/>
+				<option key="--priority-order" value="0"/>
+				<option key="--generate-strategy" value="2"/>
+				<option key="--extrapolation" value="0"/>
+				<option key="--hashtable-size" value="27"/>
+				<option key="--filter" value="0"/>
+				<option key="--learning-method" value="4"/>
+				<option key="--good-runs" value="200"/>
+				<option key="--total-runs" value="500"/>
+				<option key="--runs-pr-state" value="100"/>
+				<option key="--eval-runs" value="100"/>
+				<option key="--max-iterations" value="30"/>
+				<option key="--max-imitation" value="5"/>
+				<option key="--reset-no-better" value="10"/>
+				<option key="--max-reset-learning" value="3"/>
+				<option key="--qlearning-alpha" value="2"/>
+				<option key="--split-upper-t" value="1.75"/>
+				<option key="--split-lower-t" value="0.15"/>
+				<option key="--split-ks" value="0.25"/>
+				<option key="--split-filter-rate" value="0.02"/>
+				<option key="--split-filter-val" value="0.99"/>
+				<option key="--discount" value="0.99"/>
+				<option key="--random-search-limit" value="0.5"/>
+				<option key="--deterministic-search-limit" value="0.5"/>
+				<option key="--indifference-scale" value="0.005"/>
+				<option key="--indifference-smoothing" value="10"/>
+				<option key="--lower-delta" value="0.01"/>
+				<option key="--upper-delta" value="0.01"/>
+				<option key="--alpha" value="0.05"/>
+				<option key="--beta" value="0.05"/>
+				<option key="--epsilon" value="0.05"/>
+				<option key="--u0" value="0.9"/>
+				<option key="--u1" value="1.1"/>
+				<option key="--histogram-bar-width" value="0.0"/>
+				<option key="--histogram-bar-count" value="0"/>
+				<option key="--resolution" value="4000"/>
+				<option key="--discretization" value="0.01"/>
+				<option key="--truncation-error" value="0.01"/>
+				<option key="--truncation-time-error" value="0.01"/>
+				
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="A[0]" type="l" color="0xff0000" encoding="csv">0.0,0.0
+0.0,3.0
+1.0,3.0
+1.0,4.0
+10.889314492642487,4.0
+10.889314492642487,3.0
+11.069994806518974,3.0
+11.069994806518974,2.0
+12.385627761526854,2.0
+12.385627761526854,1.0
+12.779594254223415,1.0
+12.779594254223415,0.0
+22.0,0.0
+22.0,1.0
+42.0,1.0
+42.0,2.0
+43.340945643851946,2.0
+43.340945643851946,1.0
+45.0,1.0
+45.0,2.0
+50.01585316883703,2.0
+50.01585316883703,1.0
+51.2522028330572,1.0
+51.2522028330572,0.0
+60.000002,0.0
+
+					</series>
+					<series title="A[1]" type="l" color="0xff9900" encoding="csv">0.0,0.0
+0.0,5.0
+2.0,5.0
+2.0,6.0
+4.0,6.0
+4.0,7.0
+5.0,7.0
+5.0,8.0
+9.0,8.0
+9.0,9.0
+12.0,9.0
+12.0,10.0
+15.0,10.0
+15.0,11.0
+16.0,11.0
+16.0,12.0
+17.941852129087067,12.0
+17.941852129087067,11.0
+20.0,11.0
+20.0,12.0
+28.586112125401716,12.0
+28.586112125401716,11.0
+30.64913098420696,11.0
+30.64913098420696,10.0
+32.73616608970994,10.0
+32.73616608970994,9.0
+33.0,9.0
+33.0,10.0
+33.35940844742341,10.0
+33.35940844742341,9.0
+33.89817196117576,9.0
+33.89817196117576,8.0
+35.0,8.0
+35.0,9.0
+40.0,9.0
+40.0,10.0
+46.74794924568385,10.0
+46.74794924568385,9.0
+46.84425523709266,9.0
+46.84425523709266,8.0
+47.0,8.0
+47.0,9.0
+47.22062301355252,9.0
+47.22062301355252,8.0
+47.758828193076226,8.0
+47.762552684109394,7.0
+47.762552684109394,6.0
+47.83507912641121,6.0
+47.83507912641121,5.0
+48.0,5.0
+48.0,6.0
+49.0,6.0
+49.0,7.0
+50.0,7.0
+50.0,8.0
+53.0,8.0
+53.0,9.0
+55.0,9.0
+55.0,10.0
+55.33121802005137,10.0
+55.33121802005137,9.0
+56.0,9.0
+56.0,10.0
+57.0,10.0
+57.0,11.0
+58.0,11.0
+58.0,12.0
+60.0,12.0
+60.000002,13.0
+
+					</series>
+					<series title="A[2]" type="l" color="0xccff00" encoding="csv">0.0,0.0
+0.0,3.0
+3.3284422712138144,3.0
+3.3284422712138144,2.0
+8.0,2.0
+8.0,3.0
+10.0,3.0
+10.0,4.0
+11.0,4.0
+11.0,5.0
+14.0,5.0
+14.0,6.0
+16.874911717587374,6.0
+16.874911717587374,5.0
+17.45475021975268,5.0
+17.45475021975268,4.0
+25.0,4.0
+25.0,5.0
+29.855475498892893,5.0
+29.855475498892893,4.0
+30.96445560214114,4.0
+30.96445560214114,3.0
+31.100892262028076,3.0
+31.100892262028076,2.0
+31.65812899853922,2.0
+31.65812899853922,1.0
+31.94306516077214,1.0
+31.94306516077214,0.0
+39.0,0.0
+39.0,1.0
+44.0,1.0
+44.0,2.0
+55.59740480812606,2.0
+55.59740480812606,1.0
+60.000002,1.0
+
+					</series>
+					<series title="B[0]" type="l" color="0x33ff00" encoding="csv">0.0,0.0
+0.0,1.0
+20.716817316548266,1.0
+20.716817316548266,0.0
+27.0,0.0
+27.0,1.0
+32.0,1.0
+32.0,2.0
+39.0,2.0
+39.0,3.0
+42.0,3.0
+42.0,4.0
+47.0,4.0
+47.0,5.0
+48.0,5.0
+48.0,6.0
+60.000002,6.0
+
+					</series>
+					<series title="B[1]" type="l" color="0x00ff66" encoding="csv">0.0,0.0
+0.0,7.0
+6.492830045518949,7.0
+6.492830045518949,6.0
+13.0,6.0
+13.0,7.0
+20.0,7.0
+20.0,8.0
+20.780443252032534,8.0
+20.780443252032534,7.0
+33.0,7.0
+33.0,8.0
+36.52690786796502,8.0
+36.52690786796502,7.0
+40.0,7.0
+40.0,8.0
+51.0,8.0
+51.0,9.0
+52.0,9.0
+52.0,10.0
+55.0,10.0
+55.0,11.0
+56.0,11.0
+56.0,12.0
+57.0,12.0
+57.0,13.0
+59.0,13.0
+59.0,14.0
+60.000002,14.0
+
+					</series>
+					<series title="B[2]" type="l" color="0x00ffff" encoding="csv">0.0,0.0
+6.0,0.0
+6.0,1.0
+6.318906009814066,1.0
+6.318906009814066,0.0
+7.0,0.0
+7.0,1.0
+10.0,1.0
+10.0,2.0
+24.0,2.0
+24.0,3.0
+25.0,3.0
+25.0,4.0
+36.0,4.0
+36.004211454913644,5.0
+36.004211454913644,4.0
+44.0,4.0
+44.0,5.0
+45.0,5.0
+45.0,6.0
+60.000002,6.0
+
+					</series>
+					<series title="-8 + is_active[0]" type="l" color="0x0066ff" encoding="csv">0.0,0.0
+0.0,-7.0
+4.0,-7.0
+4.0,-8.0
+14.0,-8.0
+14.0,-7.0
+18.0,-7.0
+18.0,-8.0
+26.0,-8.0
+26.0,-7.0
+34.0,-7.0
+34.0,-8.0
+44.0,-8.0
+44.0,-7.0
+48.0,-7.0
+48.0,-8.0
+53.0,-8.0
+53.0,-7.0
+57.0,-7.0
+57.0,-8.0
+60.000002,-8.0
+
+					</series>
+					<series title="-6 + is_active[1]" type="l" color="0x3300ff" encoding="csv">0.0,0.0
+0.0,-6.0
+8.0,-6.0
+8.0,-5.0
+14.0,-5.0
+14.0,-6.0
+39.0,-6.0
+39.0,-5.0
+44.0,-5.0
+44.0,-6.0
+48.0,-6.0
+48.0,-5.0
+53.0,-5.0
+53.0,-6.0
+57.0,-6.0
+57.0,-5.0
+60.000002,-5.0
+
+					</series>
+					<series title="-4 + is_active[2]" type="l" color="0xcc00ff" encoding="csv">0.0,0.0
+0.0,-4.0
+4.0,-4.0
+4.0,-3.0
+8.0,-3.0
+8.0,-4.0
+18.0,-4.0
+18.0,-3.0
+22.0,-3.0
+22.0,-4.0
+34.0,-4.0
+34.0,-3.0
+39.0,-3.0
+39.0,-4.0
+60.000002,-4.0
+
+					</series>
+					<series title="-2 + is_active[3]" type="l" color="0xff0099" encoding="csv">0.0,0.0
+0.0,-2.0
+22.0,-2.0
+22.0,-1.0
+26.0,-1.0
+26.0,-2.0
+60.000002,-2.0
+
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate 10 [&lt;=HORIZON] {Q}</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2021-04-06 01:01:06 +0200">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+				<option key="--diagnostic" value="-1"/>
+				<option key="--backwards-order" value="1"/>
+				<option key="--priority-order" value="0"/>
+				<option key="--generate-strategy" value="2"/>
+				<option key="--extrapolation" value="0"/>
+				<option key="--hashtable-size" value="27"/>
+				<option key="--filter" value="0"/>
+				<option key="--learning-method" value="4"/>
+				<option key="--good-runs" value="200"/>
+				<option key="--total-runs" value="500"/>
+				<option key="--runs-pr-state" value="100"/>
+				<option key="--eval-runs" value="100"/>
+				<option key="--max-iterations" value="30"/>
+				<option key="--max-imitation" value="5"/>
+				<option key="--reset-no-better" value="10"/>
+				<option key="--max-reset-learning" value="3"/>
+				<option key="--qlearning-alpha" value="2"/>
+				<option key="--split-upper-t" value="1.75"/>
+				<option key="--split-lower-t" value="0.15"/>
+				<option key="--split-ks" value="0.25"/>
+				<option key="--split-filter-rate" value="0.02"/>
+				<option key="--split-filter-val" value="0.99"/>
+				<option key="--discount" value="0.99"/>
+				<option key="--random-search-limit" value="0.5"/>
+				<option key="--deterministic-search-limit" value="0.5"/>
+				<option key="--indifference-scale" value="0.005"/>
+				<option key="--indifference-smoothing" value="10"/>
+				<option key="--lower-delta" value="0.01"/>
+				<option key="--upper-delta" value="0.01"/>
+				<option key="--alpha" value="0.05"/>
+				<option key="--beta" value="0.05"/>
+				<option key="--epsilon" value="0.05"/>
+				<option key="--u0" value="0.9"/>
+				<option key="--u1" value="1.1"/>
+				<option key="--histogram-bar-width" value="0.0"/>
+				<option key="--histogram-bar-count" value="0"/>
+				<option key="--resolution" value="4000"/>
+				<option key="--discretization" value="0.01"/>
+				<option key="--truncation-error" value="0.01"/>
+				<option key="--truncation-time-error" value="0.01"/>
+				
+				<plot title="Simulations (10)" xaxis="time" yaxis="value">
+					<series title="Q" type="l" color="0xff0000" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,1.0
+2.1803133542482422,1.5409400350899247
+2.6374460698377877,2.4552054708488087
+3.0,2.817759409021358
+4.0,6.817759409021358
+4.122167693498875,7.550765392865961
+6.0,16.93992705721725
+8.0,28.93992705721725
+9.0,39.93992705721725
+10.40739544148324,59.64346309520711
+11.0,67.34732248439562
+12.0,81.34732248439562
+13.008773456675021,96.47892435850895
+13.382879834404077,101.71641357614905
+14.0,108.50473543429109
+14.365653733148683,115.08650262087811
+14.403684628281407,115.73302772928382
+15.0,125.27407378695105
+16.0,142.27407378695105
+18.0,194.27407378695105
+21.0,284.2740737869511
+22.0,317.2740737869511
+24.873512796094776,443.7086368313694
+25.097938247869283,452.91008041758886
+25.96602058204554,487.63337376764036
+26.0,488.6187768567458
+27.0,523.6187768567457
+28.0,565.6187768567457
+29.0,618.6187768567457
+30.0,683.6187768567457
+31.0,749.6187768567457
+32.0,816.6187768567457
+32.29839874992297,840.490676701089
+32.33097230259676,842.9988396424399
+32.45040268258238,850.6423840585643
+32.708210778781265,864.3062131161064
+33.0,877.1449392507957
+33.19597878733497,886.3559422946262
+33.22842599094409,887.7836191860343
+33.637551305585134,902.92125563249
+33.80235226476992,908.1948864367038
+33.8631940614664,909.9592985175778
+36.0,969.7898648834162
+38.437449648771086,1045.3508041683185
+41.0,1122.2273145467577
+42.0,1163.2273145467577
+42.117625740291615,1168.6380983478502
+42.225824091115356,1173.0742307309993
+42.43555795229282,1181.0441174918994
+45.0,1275.9284734233684
+47.0,1351.9284734233684
+48.0,1402.9284734233684
+48.14798822106885,1410.6238610308353
+48.235584359989666,1414.040110407255
+49.0,1435.4437482976443
+49.01944445358363,1436.0076373361762
+49.09635558119916,1438.1611488108213
+49.275816006925226,1443.006580153963
+49.65424507298655,1449.8183036173677
+50.0,1453.6216077892402
+50.199840345139634,1457.2187339288362
+50.687799792572385,1462.586287708546
+51.0,1464.4594890530634
+52.0,1473.4594890530634
+53.0,1483.4594890530634
+53.23013016129461,1486.911441424836
+53.61256030738268,1492.2654634397868
+54.0,1496.527300119496
+55.159484360857036,1512.7600812340634
+56.0,1523.6867844844178
+57.0,1537.6867844844178
+58.0,1553.6867844844178
+58.4905948451039,1563.008086507886
+58.8920775883077,1569.4318103897579
+59.0,1571.0506466052395
+60.0,1594.0506466052395
+61.0,1622.0506466052395
+62.0,1651.0506466052395
+63.0,1689.0506466052395
+63.56190471369102,1712.0887398697862
+64.0,1728.7363607466086
+64.65205814425379,1755.4707446043672
+65.0,1769.3884188898355
+66.0,1819.3884188898355
+67.37638856132818,1889.5842348083186
+67.633893155779,1901.9444561189987
+69.0,1966.151477687176
+73.0,2210.1514776871763
+74.0,2274.1514776871763
+74.26828641090957,2292.1266673933537
+74.4279894964704,2302.3476642572896
+74.9941372461192,2333.4857909051766
+76.0,2387.80237958253
+77.0,2448.80237958253
+77.53038426533234,2481.6862043902543
+77.6240991785385,2487.2153841933537
+77.67183827711135,2489.697816986255
+77.84120586157309,2497.658093718254
+78.0,2504.962623914787
+78.40682746050294,2529.3722713768993
+78.94231308561336,2558.823981164432
+79.0,2561.823700472482
+80.0,2625.823700472482
+81.0,2702.823700472482
+81.38891504987053,2739.7706307656736
+81.59358136870682,2756.1439350829496
+81.6125888887106,2757.493469211254
+81.92133779233953,2775.40090623719
+82.0,2779.4126785997078
+82.09692562661772,2784.8405132065304
+83.26816258109518,2844.5735983518994
+83.36966481649635,2848.633687698673
+83.8230955470737,2865.4106248666085
+84.07730643277425,2872.5285298092394
+84.44812123190849,2880.315640395837
+84.73117086968095,2884.8444347068503
+85.0,2888.8768715905444
+85.23427628839084,2895.2023311414678
+85.514798323187,2901.3738160736584
+87.0,2929.59264794929
+88.37344479535622,2968.049102201077
+89.0,2984.966092748481
+91.0,3040.966092748481
+93.10147538858692,3108.2133050224675
+93.48523838176042,3117.03985381985
+93.90253815862579,3123.7166503874178
+94.0,3124.788730625545
+94.72111452333888,3134.884333832418
+96.0,3148.952074172112
+97.0,3164.952074172112
+98.0,3190.952074172112
+98.52345507352935,3207.1791811426733
+98.82386681156626,3216.1915335017084
+100.0,3247.9471296596735
+100.21654943204453,3254.4436128413536
+100.5851259574796,3264.3951788468225
+101.0,3275.181903932532
+102.0,3305.181903932532
+103.53795516842155,3359.0103348696093
+104.0,3371.947590123723
+104.10249925007794,3375.535063833935
+104.50240978860717,3387.532379994758
+105.0,3399.972135308673
+106.0,3425.972135308673
+107.0,3454.972135308673
+108.0,3486.972135308673
+108.18603632844803,3493.855479595
+108.19489987759833,3494.156840075063
+109.0,3520.7251441805947
+111.0,3604.7251441805947
+111.02338532628544,3605.964566752403
+111.87024875930032,3648.3077385179486
+112.0,3654.146544009112
+112.1877664792816,3665.0369997552893
+114.0,3764.709843444708
+115.0,3820.709843444708
+115.12672819431857,3828.1868065252543
+115.48160692068078,3844.5112284503543
+115.55504808699146,3847.081669193821
+115.75007157488128,3852.152279940191
+116.73142558581871,3874.7234219699494
+116.86308811407794,3876.830022476837
+117.0,3878.88370078885
+120.0,3935.88370078885
+120.000002,3935.8837487888504
+
+					</series>
+					<series title="" type="l" color="0xff0909" encoding="csv">0.0,0.0
+2.0,0.0
+2.154734574736694,0.15473456589230006
+5.0,0.15473456589230006
+6.0,2.154734574736694
+7.0,5.154734574736694
+8.0,11.15473453396775
+11.0,47.15473453396775
+12.305376271386667,69.34613124431726
+12.6070467326592,73.56951752329648
+12.720423874226077,74.58991186024033
+12.795455360648283,75.04010075075918
+13.0,76.06282396665408
+14.0,86.06282396665408
+15.537544052548881,107.588440650928
+19.0,152.6003680172845
+20.218217332817463,174.52828001725356
+20.812125700425625,182.2490886867205
+21.0,184.12783175553267
+23.0,206.12783175553267
+23.102010513396998,207.35195797540283
+23.57973660880254,212.60694504097248
+24.0,216.80957889707767
+26.0,252.80957889707767
+27.058615258466812,272.9232687342425
+27.377860905848742,276.7542165595724
+27.53170808052635,277.8311467973868
+28.0,279.7043144578235
+28.172967679559513,280.9150881729731
+28.48803839430831,282.1753710165866
+29.0,283.7112558648544
+30.0,287.7112558648544
+31.79271397135885,296.674825702417
+31.980794243948765,297.4271467985327
+32.0,297.4764095897173
+32.12277780099684,297.84474298757846
+33.0,299.5991873907142
+35.0,305.5991873907142
+36.0,309.5991873907142
+37.0,316.5991873907142
+37.83425020579571,324.9416893327591
+38.0,326.43343758214206
+39.0,340.43343758214206
+40.0,357.43343758214206
+41.01209289707494,380.71157414334795
+41.52514832729599,391.9987936280167
+42.0,401.0209754545254
+42.01029634847715,401.24749501658795
+42.04193193645125,401.8485711512434
+44.0,437.0937964085905
+45.0,457.0937964085905
+45.307913758313894,465.71538145698514
+45.452953481491406,468.7612157230095
+45.71396817296276,472.9374509113479
+46.0,476.6558645974392
+46.09268947922354,477.95351730020934
+48.0,502.7485540776252
+49.0,518.7485540776252
+49.11033190483386,521.3965197647085
+49.13493300440354,521.9131428746167
+50.0,539.2144827903376
+50.45615113319017,549.7059588886593
+51.0,561.6706339227679
+52.0,584.6706339227679
+54.0,636.6706339227679
+56.0,704.6706339227679
+57.17409362758747,750.460285483413
+57.68201828699217,767.7297238193893
+58.263812466997415,783.4381666388545
+59.0,801.1066674872395
+60.0,835.1066674872395
+61.13260905369011,889.471901401383
+61.405920675552885,901.2243014251285
+61.511594806325355,905.4512669181563
+62.0,924.4990694937085
+63.0,974.4990694937085
+64.0,1029.4990694937085
+65.0,1091.4990694937085
+65.13356325827186,1099.9135544093826
+65.83326741414221,1139.0969873346594
+65.91691826760608,1143.3631807132404
+66.0,1147.1849406336594
+66.35135137741062,1163.6984550418854
+66.71493883405712,1179.6963032135945
+66.9314986361513,1189.0083747023186
+66.93913574107508,1189.313858851886
+67.0,1191.6875652034669
+68.0,1233.6875652034669
+69.16504388395897,1297.7649789116088
+69.65767138993785,1323.3816091566093
+70.0,1340.8403682463543
+71.0,1394.8403682463543
+72.0,1449.8403682463543
+73.0,1507.8403682463543
+73.05200574527228,1511.012718379417
+73.27207265265162,1523.7765989989987
+73.34741316542424,1527.9203270152539
+73.71762690512467,1547.9118693999987
+73.85117828988218,1553.3874759416585
+74.33814252281292,1572.8660454246578
+74.69651174635155,1583.2587529483671
+76.0,1609.3285180357086
+77.0,1631.3285180357086
+78.0,1654.3285180357086
+79.0,1680.3285180357086
+79.0656515112475,1682.626320486531
+80.0,1714.394169535496
+81.0,1753.394169535496
+82.53158779730573,1829.973559210496
+83.0,1851.05210849995
+83.25729421279695,1865.9751723425304
+83.56973148313014,1883.1592222041263
+84.0,1906.393722595367
+85.0,1975.393722595367
+87.0,2117.3937225953673
+87.91912763616081,2185.4091676311405
+88.0,2191.151105500013
+88.02274385704871,2192.834151208318
+88.70497309819676,2233.0856756467724
+92.0,2424.197236493709
+93.0,2497.197236493709
+95.0,2677.197236493709
+96.0937666400452,2781.105068368318
+96.66675032828631,2833.819565984467
+97.0,2864.145286774432
+98.0,2956.145286774432
+99.0,3055.145286774432
+99.0322541240547,3058.4352067022896
+99.0597163090842,3060.7694923165946
+99.78212852967256,3111.338348020709
+100.26589244552385,3138.9128917633684
+100.48353909545024,3148.9246373918368
+100.8314760203274,3161.7983034436593
+101.0,3166.854023006786
+101.00624100072051,3167.0474939919486
+101.09079496975276,3169.4150051409642
+101.42245885314522,3178.369930001
+101.54831516203726,3181.138768749935
+101.57270934676158,3181.651046683
+101.71474401895193,3184.207670641076
+102.0,3189.0570224479643
+104.1393464018282,3244.6800288960626
+105.17871048056743,3262.349218320772
+106.0,3270.5621134594185
+107.0,3281.5621134594185
+108.0,3294.5621134594185
+109.0,3310.5621134594185
+110.0,3329.5621134594185
+111.0,3351.5621134594185
+114.0,3432.5621134594185
+115.0,3464.5621134594185
+117.0,3542.5621134594185
+117.96939076693684,3583.2765259311127
+118.0,3584.4702857798366
+118.28256311359517,3597.468188814481
+118.6756831883315,3615.1585924459
+119.0,3627.482631221595
+120.0,3672.482631221595
+120.000002,3672.4827392215952
+
+					</series>
+					<series title="" type="l" color="0xff1212" encoding="csv">0.0,0.0
+4.0,0.0
+6.0,2.0
+7.0,4.0
+7.668119733463335,6.004359175467881
+8.0,6.668119733463335
+8.099744968231192,6.967354555208151
+9.0,8.767864663626199
+10.0,11.767864656391545
+11.0,16.767864656391545
+11.120005914654483,17.487900138702734
+12.0,21.88787056912756
+13.0,32.887870569127564
+14.0,48.887870569127564
+15.0,69.88787056912756
+15.028851939957592,70.52261327056094
+15.325804878541929,76.75862496737467
+15.626202911368548,81.56499334839738
+15.946454509793588,85.72826434089431
+16.0,86.37081013390973
+17.0,106.37081013314993
+17.991064132261197,135.11167010500634
+19.0,163.3618742619596
+19.027924834824173,164.17169410468233
+21.0,219.3897990846135
+22.0,250.3897990846135
+22.647509640030787,273.05263634975057
+23.0,285.03730872174987
+24.0,324.03730872174987
+25.0,373.03730872174987
+26.0,423.03730872174987
+26.854679594334648,470.89936531849605
+27.0,478.0200657953344
+27.355393745850737,496.50054023764824
+27.43445887058501,499.90034076339714
+28.0,521.390903798658
+30.0,625.390903798658
+31.0,685.390903798658
+31.27491192832369,704.9096503540079
+32.0,752.7654634026309
+33.0,825.7654634026309
+34.0,907.7654634026309
+34.709404627727764,975.1589022797259
+34.8028848233343,982.824278747436
+35.0,998.0021475655866
+35.06608456841866,1004.2801817632901
+36.0,1080.8612469824677
+38.0,1280.8612469824677
+41.0,1634.8612469824677
+42.0,1765.8612469824677
+42.03538590861888,1770.6737304101903
+42.586299207439,1842.843372211496
+43.0,1894.1422709538354
+43.920645147598336,2014.7467850260778
+44.074484588625786,2034.4382339489002
+44.571921323337676,2094.6280775446594
+45.0,2144.28520509024
+46.0,2267.28520509024
+47.09709756819637,2418.6846704458217
+47.25527287266624,2439.4056335073537
+47.75850595519105,2502.813001370531
+48.0,2532.516770272886
+48.71389604811397,2623.8954635999494
+49.0,2660.230666318141
+51.004189919155394,2916.76697412685
+52.0,3041.24323603158
+52.97907895653881,3166.5653426718995
+54.0,3296.222314991112
+55.0,3431.222314991112
+55.81477724570011,3548.550239049127
+56.0,3575.0370922380775
+57.0,3721.0370922380775
+58.0,3882.0370922380775
+59.0,4054.0370922380775
+60.00454637075052,4231.84179773685
+60.190232353259404,4261.922929472318
+60.61661846871819,4326.3072323979
+61.461165273751426,4446.232877485403
+61.76999041660488,4485.453670905822
+61.77098119324978,4485.572563892609
+63.0,4617.077577036418
+66.0,4992.077577036418
+68.0,5272.077577036418
+69.98998552932663,5598.43520301219
+70.4471864097706,5671.130144067786
+70.45954723926454,5673.008989548531
+71.0,5752.455545732077
+71.72850029430299,5870.472594050787
+71.8402501320073,5888.240815474432
+74.0,6229.4812967425305
+75.0,6392.4812967425305
+76.0,6572.4812967425305
+78.0,6970.4812967425305
+79.62798100308127,7296.077497194836
+81.0,7563.621201754013
+82.0,7777.621201754013
+82.6151514121993,7912.339360849304
+82.83486554334063,7956.282187178255
+83.57559505251128,8100.7244404227085
+84.0,8182.210191421368
+85.0,8377.210191421369
+86.0,8577.210191421369
+86.2991692813481,8639.138231722318
+87.0,8783.50936069695
+88.0,9008.50936069695
+90.0,9460.50936069695
+91.3181044435047,9770.263906102318
+91.97762690309736,9919.315981360822
+92.0,9924.260435269964
+93.0,10154.260435258
+94.0,10405.260435258
+95.0,10659.260435258
+97.0,11189.260435258
+98.05629372954407,11474.459740130837
+98.70941895695088,11648.844175023674
+99.0,11723.232924834674
+99.28113819818138,11798.296822058255
+99.34928594446782,11816.424121882255
+100.0,11982.356208316964
+100.63651628340733,12159.307735852
+102.0,12526.084854891964
+104.0,13078.084854891964
+104.30981584886611,13166.692187476
+104.45250113062616,13204.789160160255
+104.60413169954843,13243.909843553836
+104.63541000479096,13251.447916771964
+105.15741132453356,13373.596223463965
+105.85721809512602,13521.255454951837
+105.86321614658817,13522.395081410383
+107.0,13716.785122152709
+108.0,13888.785122152709
+108.53928309658797,13991.788194715964
+108.63445598273222,14009.490350212964
+108.67107533675122,14016.191693746836
+109.0,14076.055980955836
+110.0,14267.055980955836
+114.0,15099.055980955836
+115.0,15326.055980955836
+116.0,15585.055980955836
+116.33794154924408,15676.976082421
+117.81856132753423,16060.456604158837
+117.83370455414905,16064.212126629418
+119.0,16352.287100230546
+120.0,16600.287100230547
+120.000002,16600.287644230546
+
+					</series>
+					<series title="" type="l" color="0xff1b1b" encoding="csv">0.0,0.0
+2.0,0.0
+2.07620369072625,0.15240733214824437
+3.0,1.07620369072625
+4.0,3.07620369072625
+5.0,8.076203690726249
+6.0,14.076203657191959
+6.168402882197052,15.255023662023827
+7.0,20.244606518264533
+10.0,47.24460651826453
+10.072764961876192,47.97225617741375
+11.0,54.46290142350419
+11.168323653769379,56.48278515097042
+13.0,76.63122506366552
+14.0,95.63122506366552
+14.40648103059679,107.01269409976793
+14.533909901639902,109.43384241714588
+15.032735153399457,118.41269721335743
+15.055553347923064,118.55487584227843
+16.0,121.38821578992324
+17.0,127.38821578992324
+18.0,139.38821578992324
+18.19103598623779,142.25375556007293
+19.0,153.57925176475055
+20.0,168.57925176475055
+23.0,219.57925176475055
+23.019763719885983,220.15239953724725
+23.081488938095486,221.51035436714204
+23.155780237553596,223.07047150414206
+23.33293332567795,225.90492094677427
+23.9339888049226,233.71864216664193
+25.0,246.5107766170858
+27.0,276.5107766170858
+27.932900946260993,293.3029934372409
+28.0,294.44367754380517
+31.741233091675905,361.7858731548257
+32.239070428034296,369.2534330656135
+32.25675688155289,369.501043477825
+32.76694574087882,374.0927432660003
+32.77484998262111,374.1401687371294
+34.0,380.2659188151269
+36.0,394.2659188151269
+37.0,402.2659188151269
+37.099311912558804,403.45766170012854
+38.0,413.3652307217521
+40.0,441.3652307217521
+40.09016274261487,443.07832287399395
+40.22723670326096,445.54565404124276
+41.37819093515047,460.5080591187499
+41.47730972538947,461.4992470097544
+42.0,466.20345949069116
+42.34526480267266,469.65610752362204
+44.0,484.54872428651214
+45.07262032911981,495.27492749941933
+45.145242404255164,495.78328201468867
+45.149049299737975,495.80612341403724
+46.0,500.0608769342425
+46.12747210546711,501.2081258377528
+47.0,508.18834904910636
+48.0,521.1883490491064
+49.0,535.1883490491064
+49.30259793723058,541.5429057044098
+49.969965059827125,550.8860453708235
+50.0,551.1563598702854
+50.703976699491406,561.7160103280754
+50.756646658534564,562.3480497197116
+51.0,565.0249366075819
+53.197457229990555,604.5791667317372
+53.871498684638084,616.0378715145317
+55.0,634.0938925251165
+56.0,651.0938925251165
+57.23297318376622,673.2874098067641
+57.42593247196035,675.409962021058
+58.0,678.8543671780634
+58.231682541858454,680.9395100446508
+58.42637599941779,682.1076707485367
+59.0,684.9757907834891
+61.14330514873547,699.9789267959652
+61.30913708322816,700.973918360287
+62.0,704.4282330052583
+62.925581423815615,709.9817214709883
+63.0,710.3538144155289
+66.0,728.3538144155289
+67.0,738.3538144155289
+68.0,749.3538144155289
+69.0,765.3538144155289
+69.02502698723266,765.8293271206309
+69.10443888156777,767.0999173987354
+69.9676770543963,780.0484898208014
+73.0,822.5010112903186
+74.00073465147399,841.5149695754099
+76.0,877.5017459274247
+77.0,902.5017459274247
+78.0,936.5017459274247
+78.52482235172893,960.6435740912901
+78.52541107060384,960.6641786755475
+79.0,973.0034912715128
+80.0,1009.0034912847085
+81.0,1057.0034912847086
+82.0,1106.0034912847086
+82.42321961944845,1128.0109113832546
+84.0,1208.4267109047719
+85.0,1262.4267109047719
+86.0,1334.4267109047719
+87.0,1407.4267109047719
+88.04814592274776,1487.0857999554178
+88.08820397703661,1490.0100385869002
+88.35057710217114,1508.9009038364177
+91.0,1697.009929705722
+91.36237633471823,1727.0871649706735
+91.81682425076768,1762.5341025253185
+93.0,1848.9059325712901
+93.40446600739716,1884.4989407019002
+93.41453977717048,1885.234325928077
+93.60333015197442,1898.4496519905317
+93.67206421627311,1902.367493464722
+93.77041511650914,1907.6784428410128
+94.10922737351632,1925.6354923918211
+94.287844436385,1933.1374090012537
+96.0,1989.6385425769636
+97.0,2031.6385425769636
+98.0,2082.6385425769636
+98.29053074282471,2100.9419783737085
+99.0,2144.929073303141
+101.0,2270.929073303141
+101.13880393969498,2280.506545360609
+102.0,2332.1783087881763
+102.99534379788349,2404.8384060327085
+103.0,2405.145715370255
+105.0,2539.145715370255
+105.19167223670219,2552.5627714562893
+105.92315874373722,2594.2575023777085
+106.006736533012,2598.102081134531
+106.27026094192101,2609.4336305258225
+106.66899736306911,2622.99066881758
+106.6885857488282,2623.637085612822
+106.92735561823802,2629.8451021963037
+106.96546125958797,2630.6453208008224
+107.06307400074039,2632.402349969949
+109.0,2665.330092027112
+110.38017083616892,2690.1731671323046
+111.0,2699.470604540886
+111.1160698624105,2701.559862155787
+111.32156077132201,2705.053207472545
+111.35003047706978,2705.451783420403
+112.0,2713.90138719424
+113.0,2731.90138719424
+114.0,2757.90138719424
+114.05845581037642,2759.5381501556585
+114.28146480368078,2764.2213389143035
+115.0,2778.5920427449637
+115.8257058538352,2800.8861009681905
+115.92686030083703,2802.909189795595
+116.30040926751369,2808.512424223354
+116.43632756936309,2810.1434438813676
+120.0,2849.3438406315804
+120.000002,2849.3438686315803
+
+					</series>
+					<series title="" type="l" color="0xff2424" encoding="csv">0.0,0.0
+2.0,0.0
+3.0,1.0
+3.2427384657847322,1.4854769107265047
+4.0,2.2427384657847322
+4.80278334730904,3.8483050987909087
+5.0,4.045521795868139
+6.0,7.045521795868139
+7.0,14.045521774923978
+7.427499310666061,18.320514637272364
+8.0,22.32801963176439
+8.68981343187209,29.22615363815064
+9.0,32.017833026484865
+10.0,51.017833026484865
+11.0,71.01783302648487
+11.407179435250253,82.01167749045644
+11.43104797869657,82.4890484995928
+11.518710063284702,83.80397969649773
+11.892319564010917,88.28729380694756
+12.0,89.47177860193527
+13.0,103.47177859524186
+13.001505797355213,103.49888304416508
+15.0,137.47328439965142
+16.0,155.47328439965142
+17.10979390593094,186.5475137014938
+17.624227517886936,199.4083541453053
+19.0,232.42689362792237
+21.0,298.42689362792237
+21.147744803085278,304.0411959902863
+21.218236747819827,306.0854625191452
+22.33627912039805,330.6823945114692
+22.53586940499684,334.4746100863457
+23.0,342.8289608008194
+24.0,374.8289608008194
+25.0,408.8289608008194
+26.0,454.8289608008194
+29.0,595.8289608008193
+29.224979651260867,607.0779429466911
+29.57729834404679,621.5230095223076
+30.0,638.431075921108
+30.375090000451696,655.3101256944692
+30.829677979854207,672.5844688473694
+31.0,678.2050957570082
+32.0,718.2050957570082
+33.0,763.2050957570082
+33.090304913888986,768.0815615505911
+33.518961178565554,789.9430306336372
+34.0,813.9949717006507
+35.0,864.9949717006507
+36.0,922.9949717006507
+37.0,989.9949717006507
+39.0,1125.994971709722
+39.045376825682865,1129.1259728865311
+40.045379845063486,1189.1261532973044
+40.330447469312986,1204.2347373275945
+41.0,1236.3732593073187
+42.0,1289.3732593073187
+43.03653563720459,1351.5653970031904
+43.20530844523395,1361.5229927773685
+45.0,1451.2575708763043
+45.43824005358676,1477.1137343274818
+45.776972345521024,1494.7278128869636
+46.0,1505.2101129804028
+47.0,1555.2101129804028
+48.0,1621.2101129804028
+48.16637099201413,1633.6879369999629
+52.55532350493647,1958.4704232829636
+52.710416580896236,1969.482031836595
+53.0,1986.857036886836
+53.44055973245274,2018.136777706886
+53.83637882233305,2045.8441136885317
+56.0,2177.825005959431
+56.36533611390344,2200.4758444878225
+56.41177080640759,2202.8440137079992
+56.55792644780767,2209.567173648177
+57.0,2225.9238951208354
+59.0,2317.9238951208354
+60.0,2364.9238951208354
+60.348736322398786,2385.4993384380628
+60.96554145922879,2420.040425694964
+61.0,2421.935645558112
+62.0,2487.935645558112
+64.0,2641.935645558112
+64.06208854034276,2647.026905152886
+64.96415141267782,2711.073369420772
+65.80844749539563,2763.41972696629
+66.0,2773.9551145702053
+66.07287353242849,2778.4732734102054
+66.6140689536617,2809.3214125490626
+67.0,2830.1616890825444
+67.57545331894788,2862.962528382078
+67.58286639550144,2863.3628343565947
+68.0,2885.47091543785
+69.0,2951.47091543785
+70.0,3026.47091543785
+70.11698475551177,3035.595726208709
+71.0,3096.5237782144677
+71.11225827336784,3105.953472809723
+72.0,3167.2076522507086
+73.0,3251.2076522507086
+74.0,3344.2076522507086
+75.0,3442.2076522507086
+75.2857114753935,3470.4930871363185
+75.72998222603275,3512.2545385911267
+76.0,3536.8261562383686
+77.0,3644.8261562383686
+79.84650807959834,3957.9420447771768
+80.0,3972.216793561176
+81.0,4076.216793561176
+82.30829817919688,4234.5208717278365
+83.0,4317.525091729673
+84.0,4456.525091729673
+85.0,4619.525091729673
+86.0,4785.525091729673
+87.0,4956.525091729673
+87.06274828111566,4967.568787726708
+87.17827733400392,4987.3242559787095
+87.29519748276493,5006.733002350482
+87.45689441529528,5033.08960195085
+87.65962932462548,5065.932657940369
+87.69763859037609,5071.976129842355
+88.0,5119.749233166709
+89.0,5300.749233166709
+90.0,5506.749233166709
+92.0,5920.749233166709
+92.14274089352776,5950.7248219671765
+93.0,6128.177455868645
+93.13478862631702,6160.122360833949
+93.20233775226474,6175.9288532102555
+94.0,6361.784159490822
+96.0,6885.784159490822
+97.0,7161.784159490822
+97.03606977418404,7171.775484221127
+97.95755906019583,7400.30482955271
+98.0,7410.787741723176
+98.5231644984659,7541.578864580546
+98.57963843887912,7554.172554151822
+98.86388569974902,7613.864477510127
+98.89505799937855,7620.067767369383
+98.96784523384179,7633.897340850417
+99.0,7639.7816638555805
+102.0,8191.7816638555805
+102.0810787194487,8206.781228375838
+102.33228204412757,8253.00263836524
+103.0,8375.195024624836
+105.0,8743.195024624836
+105.0685306905778,8757.65499973919
+105.9394610087855,8937.066643233127
+106.04409624177264,8958.307597430467
+106.5904342992055,9054.463095238709
+106.93583609242154,9114.90841014485
+107.0,9124.532996118658
+108.0,9277.532996118658
+109.0,9456.532996118658
+109.4631092398876,9541.745097611822
+109.71314964568077,9587.502491398835
+110.0,9639.709255012885
+110.27477959254055,9689.993920361787
+111.0,9821.984034608176
+113.0,10201.984034603127
+113.18365099182753,10237.979628234383
+113.75117826924253,10346.377340682837
+113.86996948333123,10368.710087353127
+114.0,10393.025793861127
+114.25166940146224,10440.339641757673
+117.0,10954.277463263
+118.0,11144.277463263
+118.14618280157693,11173.221659906127
+118.6244458926252,11266.482961028418
+119.0,11339.340457591
+120.0,11540.340457591
+120.000002,11540.340879591
+
+					</series>
+					<series title="" type="l" color="0xff2d2d" encoding="csv">0.0,0.0
+2.0,0.0
+3.079109248410687,1.0791092484106868
+4.0,1.0791092484106868
+4.188181969754745,1.4554731534691743
+5.0,2.267291183714429
+5.37251725521291,3.012325685167447
+10.0,7.639808438927339
+10.140245799486815,7.920300023392372
+11.0,8.78005424401186
+13.0,14.780054225925225
+13.18402931677268,16.068259430403096
+13.625126887488605,18.7148448625451
+17.231781266288813,36.7481167473077
+18.0,39.820991685786716
+19.0,45.820991685786716
+20.0,54.820991685786716
+21.0,67.82099168578672
+21.095135408651043,69.15288735496804
+21.62915378890732,75.02708948876402
+22.0,78.73555167995892
+22.489818204987962,86.57264274146223
+23.0,94.22536987743071
+25.0,130.2253698743915
+25.352141733583757,139.38105475727028
+25.423074772109114,141.01251471015627
+26.0,153.70486981644459
+28.0,221.70486981644459
+28.067176326097943,224.05604132283992
+30.0,289.77204614798194
+31.0,330.77204614798194
+32.284025011683845,394.97329680941704
+32.592498414244695,408.2376527015778
+32.91752077682962,420.58850286520686
+33.339911074151885,435.3721629543773
+33.35978710353922,435.9684440864494
+34.0,453.2541922632545
+36.0,509.2541922632545
+37.0,548.2541922632545
+39.0,632.2541922632545
+40.0,692.2541922632545
+40.11501341768852,699.2700108442339
+41.0,752.3692056719567
+41.401441796696936,776.8571554123558
+41.862525340771086,804.5221682342848
+42.0,812.0832741981491
+43.0,872.0832741981491
+44.014851366041576,933.9892074396981
+45.26384530858262,993.9409168300215
+45.32831825801113,996.9711450415342
+45.57236875128461,1005.7569625590777
+46.0,1017.3030066544319
+47.0,1053.303006654432
+48.01510969730807,1090.8620656131275
+49.0,1126.3181163559495
+50.0,1173.3181163559495
+52.0,1293.3181163559495
+52.290338785939596,1317.125897479191
+52.47933342439579,1329.788537899531
+52.60125952211273,1336.3725469782544
+52.84218138177976,1346.7321866715945
+53.0,1352.0980199296735
+53.130266642730895,1356.6573524580135
+53.26331742646856,1360.382774507595
+53.620735721864776,1368.6033950020135
+55.0,1396.188680731787
+56.0,1419.188680731787
+56.26332623080062,1427.8784465937856
+61.0,1579.452006969787
+62.0,1614.452006969787
+63.0,1660.452006969787
+63.36701752355622,1679.1699003425304
+64.0,1708.2870945612538
+64.6909338451788,1751.1249924475446
+65.0,1766.2692344385305
+67.90317058791747,1946.2658102458226
+68.0,1952.1724050119353
+70.0,2084.172405011935
+72.0,2256.172405011935
+73.0,2347.172405011935
+74.0,2462.172405011935
+75.0,2586.172405011935
+76.0,2736.172405011935
+76.06583008031843,2746.507727094772
+76.59545709907074,2819.596253902821
+77.0,2872.5913760564813
+77.1254085011898,2891.2772418981276
+78.0,3015.4692355250277
+79.0,3164.4692355250277
+80.0,3326.4692355250277
+80.61359061767091,3431.393229975531
+80.75332542208074,3453.471330489595
+81.54396634922624,3569.6955448894028
+81.61450573286916,3579.4299819707867
+81.62386136627998,3580.65556907085
+81.97918734908794,3624.0053382374817
+82.0,3626.4404193239643
+83.0,3752.4404193239643
+84.0,3898.4404193239643
+84.57637848793027,3983.168056129673
+85.0,4045.016797806418
+86.0,4192.016797806417
+87.0,4358.016797806417
+89.0,4716.016797806417
+89.34831851066114,4785.680498443403
+89.36019004138923,4788.01918960395
+90.82143083007232,5074.422386314028
+91.0,5107.1005441569005
+91.18366806525911,5142.915818209467
+91.51433195765867,5203.757972457531
+91.60461499918759,5219.557505265787
+92.0,5285.982185525289
+94.0,5633.982185525289
+94.19944484572069,5669.68281271658
+94.2892491224796,5685.308757195014
+94.72578116393456,5752.098159605481
+94.85091890375938,5768.866617287886
+95.0,5786.309104923532
+97.0,6034.309104923532
+98.10612454538241,6190.272665637319
+98.42489827173144,6234.263439775113
+99.0,6313.052376829382
+100.0,6459.052376829382
+102.54757276324024,6859.021299735028
+102.86430250258346,6905.263841928835
+103.0,6923.854399641418
+104.0,7079.854399641418
+104.47928195217276,7158.9359232897095
+104.71587988352472,7195.845197920595
+107.0501176701269,7543.646628433367
+107.05333619075142,7544.0650357926725
+107.51687934980295,7599.226673335
+107.96963638360467,7649.029946514432
+108.95089552059767,7740.28704566095
+109.0,7744.117195507645
+111.0,7944.117195507645
+112.0,8053.117195507645
+113.0,8179.117195507645
+114.0,8306.117195507644
+114.16683689398042,8330.475382949595
+115.0,8451.284032414822
+116.0,8607.284032414822
+118.0,8961.284032414822
+118.88706101250553,9130.712685626595
+119.16374951746923,9179.963241199028
+119.8845505819883,9300.337017548836
+120.0,9318.578025582823
+
+					</series>
+					<series title="" type="l" color="0xff3636" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,1.0
+2.1875885713939045,1.37517710471948
+2.6455501624763196,1.8331387188055521
+3.0,1.8331387188055521
+6.0,4.833138718805552
+7.0,6.833138718805552
+9.0,12.833138687009411
+12.0,30.83313868700941
+12.228839491021875,33.12153351635234
+12.34725919782983,33.95047142758555
+13.0,37.86691632751635
+15.038352507982504,54.173736422511766
+16.0,60.90526884331299
+16.20914696750245,62.578444521332216
+17.0,68.11441579575076
+18.0,78.11441579575076
+19.218785451767957,91.52105573219617
+19.6741240930777,95.16376479323237
+20.0,97.44489622108965
+20.203671208498637,99.88895077032039
+21.0,108.64856742979096
+22.0,120.64856742979096
+23.320585822680105,145.73969807037642
+25.0,175.9691532595254
+26.0,196.9691532595254
+27.0,226.9691532595254
+29.0,308.9691532595254
+31.0,416.9691532595254
+31.53397550427932,446.3378056811698
+31.803069042030163,460.33066971301673
+31.847620798271695,462.60280919561734
+32.0,470.2217695748235
+33.0,523.2217695748235
+33.04098539435573,525.4349806252131
+34.0,576.2627549755367
+34.042431833318176,578.5540740025128
+35.0,629.3051868038838
+36.0,683.3051868038838
+37.0,752.3051868038838
+37.786090884308315,807.331547943085
+38.0,822.0912776724629
+39.0,894.0912776724629
+41.20583977543795,1066.1467808487862
+41.30430986020825,1072.3503954521761
+41.40234637984407,1078.0365137943827
+41.660264189666194,1089.642815188645
+41.87620134324304,1096.9846780749
+42.691320423424244,1122.2533696045946
+43.0,1129.0443204882545
+44.0,1160.0443204882545
+46.0,1232.0443204882545
+47.0,1271.0443204882545
+49.0,1365.0443204882545
+50.37936871720129,1431.2540185229986
+50.417825198410746,1433.0614730436087
+51.0,1455.1841158884176
+51.85983204839547,1493.876557596077
+52.0,1499.2029401565944
+53.0,1538.2029401565944
+54.0,1586.2029401565944
+55.0,1642.2029401565944
+57.0,1768.2029401565944
+58.0,1836.2029401565944
+59.0,1905.2029401565944
+60.0,1984.2029401565944
+60.49006865352749,2025.368706578467
+60.545548013448,2029.6406167583186
+60.622921453625786,2035.2115054756594
+61.0,2058.9674537890633
+61.150791152191594,2069.8244164366733
+63.0,2197.4198272413673
+64.0,2277.4198272413673
+64.71362600685528,2339.5052895511126
+64.86867270172714,2352.2191186584955
+65.0,2362.5939753521125
+65.19638688040021,2379.8760207801274
+66.0,2449.790362236673
+67.0,2545.790362236673
+69.0,2785.790362236673
+69.0172450161931,2788.3081336695445
+69.63778127818331,2875.8037477472903
+69.63860351734847,2875.9106389092904
+71.0,3040.639613041417
+73.03862531515773,3289.351900737658
+74.0,3405.6782383479494
+75.0,3529.6782383479494
+76.0,3671.6782383479494
+77.0,3822.6782383479494
+78.28277399848436,4030.4876253820134
+78.33191835689486,4037.8101355293684
+79.0,4130.005402202581
+79.04909975711615,4137.615863821176
+79.44039708176638,4193.962677614126
+79.5718024609758,4211.70240441924
+79.98218362821196,4263.410433141709
+81.0,4384.530580643417
+82.0,4519.530580643417
+83.0,4661.530580643417
+83.16284302426382,4684.817133166949
+87.00820954053334,5230.859179788076
+87.81790615900887,5340.168222556318
+88.0,5361.655295294609
+88.20608189127894,5387.415530124432
+88.2285659557534,5390.068650421383
+88.89908706843674,5465.83753667266
+89.0813207065278,5483.696433305673
+89.12766328845571,5488.098977844432
+89.9113362949361,5552.360164498787
+90.0,5559.541925220608
+90.27988696937808,5585.851299284112
+90.73049081120388,5622.350210879383
+90.87013500163741,5632.125304514304
+91.0,5640.047069528821
+92.0,5706.047069528821
+93.0,5784.047069528821
+94.0,5871.047069528821
+94.8268181843431,5952.075252062674
+94.98193635938276,5966.191004555255
+95.0,5967.744478593659
+96.0,6060.744478593659
+97.0,6175.744478593659
+97.06375625651917,6183.905280011659
+99.0,6429.808234853723
+101.0,6693.808234853723
+101.07981482741616,6705.541015019821
+101.30785323299213,6735.642084898786
+101.50430151363337,6759.019429368786
+102.0,6812.554866063851
+102.9139516332987,6917.659303487113
+103.0,6926.780430727999
+106.0,7316.780430727999
+108.0,7594.780430727999
+109.53519960632268,7834.2715694465805
+109.76033110988598,7865.564847816787
+109.84464698080133,7876.52591079358
+110.0,7895.634332833787
+110.41307808381467,7949.334484431999
+110.79263265201604,7992.983258340645
+110.86799671651214,8001.122578599786
+112.0,8117.718916295318
+113.0,8235.718916295318
+114.0,8364.718916295318
+114.25635321862838,8398.04483519682
+114.33449345638613,8407.343522809078
+114.9333433377063,8473.217010020142
+115.0,8480.082646191531
+116.0,8588.082646191531
+117.0,8703.082646191531
+117.0713460180095,8711.50147713853
+117.81981671590114,8796.078665430594
+117.88087563185191,8802.795146314176
+118.0,8815.779702108382
+118.27402871534956,8851.677464645481
+119.0,8940.245960604545
+120.0,9071.245960604545
+120.000002,9071.246244604545
+
+					</series>
+					<series title="" type="l" color="0xff3e3e" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,1.0
+3.0,3.0
+4.0,8.0
+6.0,20.0
+7.0,29.0
+8.0,43.0
+9.0,65.0
+10.0,96.0
+10.210646675115722,102.9513403331698
+11.0,128.21064667359613
+11.429344967538306,143.2377201175898
+11.637559262529312,148.6512920110095
+11.674280153881988,149.34898905882187
+12.0,153.909066872485
+13.111060622107566,180.5745219112197
+13.198913287915348,182.24372243888917
+16.077121135259105,228.29504813481938
+16.909463869853564,237.45081819924974
+17.0,238.17510720178686
+18.912292212683703,259.21032150588917
+18.936906344873407,259.4207774529011
+19.0,259.79933947300816
+20.0,268.79933947300816
+22.0,298.79933947300816
+23.0,314.79933947300816
+24.0,335.79933947300816
+27.0,416.79933947300816
+28.0,448.79933947300816
+30.237085088536187,536.0456578547537
+30.305203895335385,538.4979350041197
+30.747112647293527,553.964741028214
+32.0,596.5629112692845
+34.0,682.5629112692845
+35.613478820342394,764.8503303089312
+36.0,781.0842205062419
+36.1465843063246,787.3873460616167
+36.285179709666906,792.3767801563185
+36.29835258717193,792.8378306303075
+36.6102768146337,801.5717089624272
+36.89672490041529,808.160015039214
+37.0,810.0189669442188
+38.0,833.0189669442188
+39.0,863.0189669442188
+41.0,941.0189669442188
+43.0,1041.0189669532901
+43.06106194166953,1044.560559113531
+44.20849026347078,1109.9639739045447
+45.0,1154.2885191501769
+47.0,1276.2885191501769
+48.0,1338.2885191501769
+48.04897672163233,1341.765866228141
+48.666128596689944,1380.0292823835446
+48.77043843836647,1385.9749432613542
+48.86313784571651,1390.6099140299489
+50.0,1441.768710865013
+51.0,1504.768710865013
+51.782623546363666,1556.421864854886
+52.0,1567.942816950787
+52.15436869828574,1576.2787267849494
+52.25857280864458,1580.7595032050128
+52.78987509057847,1598.823781002531
+53.0,1604.4971535330128
+55.0,1668.4971535330128
+55.76713884821729,1698.415568272645
+55.99493084622679,1705.7049123678853
+56.31679585380276,1715.0389976595952
+56.68839747515452,1723.9574365603037
+58.0,1751.501089620673
+60.0,1813.501089620673
+60.69643737304924,1837.1799603299994
+61.0,1847.1975269980762
+63.28928883911201,1934.1905025725316
+63.78276307629902,1949.4882042091263
+64.18841405748122,1960.0351293448502
+64.36648753099001,1964.130819346496
+65.0,1978.0680938520627
+65.02707466905437,1978.6908112982544
+67.0,2022.0951685223827
+68.0,2050.0951685223827
+69.0,2079.0951685223827
+69.86125197926911,2104.932727661709
+70.25849975643816,2114.863922097723
+70.42547870208965,2118.8714169477084
+71.14114061385649,2133.90031707585
+71.27622515322562,2136.6020078595952
+71.77058319551102,2144.017378640964
+72.0,2146.7703802067226
+73.0,2161.7703802067226
+74.0,2184.7703802067226
+74.73450831463603,2203.8675963100136
+75.0,2210.5048885157726
+76.0,2240.5048885157726
+78.0,2302.5048885157726
+79.0,2334.5048885157726
+79.54122252411518,2355.612566739836
+79.75499616814142,2362.4533234355954
+80.0,2369.0684269743538
+80.32628965527265,2378.857116674673
+80.5730000238458,2385.5182963667094
+82.0,2422.6202959660764
+83.0,2454.6202959660764
+83.48082827616963,2470.4876290847087
+83.71566251850139,2476.593319526255
+83.93990174667461,2481.3023432056584
+84.0,2482.3841117622396
+84.38798216578625,2490.531736940417
+85.0,2502.772093914431
+86.0,2532.772093914431
+87.0,2569.772093914431
+88.0,2611.772093914431
+88.20562321784578,2621.4363847694676
+88.57666566281429,2636.2780828377076
+89.0,2651.094784686205
+89.27365833001288,2662.5884341529354
+89.79251838855326,2681.7862566658214
+91.0,2722.840631455432
+92.0,2757.840631455432
+92.02831085794875,2758.916443661822
+92.32424345159517,2768.090354256403
+92.44678908407144,2771.276540913531
+92.8583434319358,2780.7422907176733
+93.0,2783.2921090298355
+93.25182853172994,2788.5805080580635
+93.73452820777094,2797.269102195482
+94.0,2801.25117920453
+96.0,2847.25117920453
+97.0,2877.25117920453
+97.44732405449604,2893.3548449596587
+97.98141986657339,2910.9800069650137
+98.0,2911.463090417531
+100.0,2973.463090417531
+100.18764615290748,2980.2183520832396
+100.46104814949537,2988.693813548963
+102.0,3028.7065619059986
+103.0,3061.7065619059986
+104.1823581704487,3112.5479635629995
+104.33104740173,3118.495532647482
+105.0,3144.5846838404677
+106.0,3190.5846838404677
+107.0,3241.5846838404677
+108.0,3301.5846838404677
+109.0,3372.5846838404677
+110.0,3450.5846838404677
+111.0,3535.5846838404677
+113.04879860578846,3728.171753344191
+113.60676558879345,3780.0626822777576
+114.0,3812.307903934709
+116.0,3998.307903934709
+117.0,4102.307903934709
+117.89548176529331,4203.497343310496
+118.0,4214.367239821112
+119.0,4327.367239821112
+120.000002,4453.367491821112
+
+					</series>
+					<series title="" type="l" color="0xff4747" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,1.0
+2.7897174196732264,3.3691522172947344
+4.0,5.789717419673226
+5.0,11.789717408821247
+6.0,20.789717408821247
+6.68912516671531,27.680968880825706
+7.496449691706667,33.332240554529356
+8.0,36.35354252380133
+10.0,50.35354252380133
+11.0,61.35354252380133
+12.876837452647404,83.87559202415488
+13.0,85.23037996893255
+13.19223199573031,87.9216279264627
+13.19683082693539,87.97221500470523
+13.508532280824841,91.08922951050624
+14.0,95.5124390621356
+16.0,123.51243906061599
+16.735806668588452,134.5495391084107
+17.0,138.24824573032518
+18.0,153.24824573032518
+19.0,169.24824573032518
+20.0,188.24824573032518
+22.0,240.24824573032518
+22.394363084360673,252.47350124603503
+23.0,268.220061145879
+24.0,302.220061145879
+25.0,341.220061145879
+25.014770972047454,341.84044195293205
+25.06623270583033,343.74452608872053
+25.415852963246042,355.63161491114903
+26.0,374.9084670766451
+27.0,412.9084670766451
+28.0,458.9084670766451
+29.0,507.9084670766451
+29.64584775678396,544.7217889764739
+30.0,564.5543148259129
+31.0,629.5543148259129
+32.0,699.5543148259129
+32.48865498416326,738.1580589430628
+32.59639182183616,745.9151100770167
+32.62520424859258,747.8455430399384
+32.651824528101514,749.5492415181942
+34.0,823.6988923039447
+36.0627744113469,939.2142590366595
+36.36965113216892,955.4787256890215
+37.0,988.2568666573433
+38.0,1060.2568666614677
+40.0,1232.2568666614677
+40.608535873171135,1291.2848462007228
+44.0,1616.8654025360136
+44.600966705397,1682.370773844176
+44.69372466295901,1692.3886323016088
+44.801800397109524,1702.6558271184817
+45.0,1719.3045941219636
+45.05777269435276,1725.0240908442895
+45.68357696407507,1781.3464745520635
+45.83938322292247,1794.2783941095317
+46.0,1806.8065031607862
+47.0,1887.8065031607862
+48.0,1969.8065031607862
+48.23111434608248,1993.8423951632537
+48.51295827360787,2021.7449435970627
+48.761329739587296,2045.5886048870627
+49.0,2068.2622794432395
+50.0,2168.2622794432395
+51.0,2271.2622794432395
+52.42066737615065,2424.6943561473186
+52.806923214436736,2464.4787071857727
+53.22394195264071,2506.180580956481
+55.0,2682.010327913786
+56.0,2800.010327913786
+57.0,2925.010327913786
+57.35545440070294,2969.7975813206094
+57.48555106372278,2983.7179248796733
+57.68565314848624,3003.7281338844314
+58.0,3029.8189223553677
+60.0,3229.8189223553677
+60.09097446250223,3239.0073430622397
+60.840089500601586,3310.9223862349486
+60.95030194738737,3321.172144458354
+61.0,3325.7443651032545
+64.0,3622.7443651032545
+64.26733906016634,3649.478271242304
+64.99211237181309,3721.230828745467
+65.0,3722.003816532723
+66.0,3829.003816532723
+67.0,3955.003816532723
+68.0,4085.003816532723
+68.02778787577,4088.64402842185
+69.0,4197.531786199836
+69.10973084064511,4209.931371381126
+69.49063236016542,4249.545127931076
+69.79316579123574,4278.890871378886
+69.99722508931094,4298.480563084254
+70.0,4298.7330813651415
+71.0,4393.7330813651415
+72.0,4507.7330813651415
+72.40385704874453,4555.792070041545
+72.80656382130744,4603.31146835295
+73.0,4625.556629850496
+73.78338137803316,4721.129157697418
+75.0,4868.340011225077
+76.47415984267461,5079.144868771532
+76.56644909326911,5092.0653627222055
+77.0,5152.328939842403
+78.0,5314.328939842403
+80.0,5640.328939842403
+81.0,5806.328939842403
+81.74402685463245,5933.557531058467
+81.78142087190889,5939.0918462331265
+81.8004061371141,5941.768767440531
+82.3666421023564,6021.041802441772
+82.42079654897634,6028.3526541903675
+84.0,6236.807509700191
+85.0,6375.807509700191
+86.0,6517.807509700191
+87.0,6691.807509700191
+89.0,7089.807509700191
+90.21408793035026,7332.62509647124
+90.57698210854285,7401.937882176014
+91.0,7482.311283200823
+91.21238943932464,7522.877666546786
+91.50598490792801,7578.66080614066
+91.66456124658363,7607.680274427467
+92.0,7667.388373248127
+93.0,7872.388373248127
+94.0,8083.388373248127
+94.8470216998107,8264.651017524126
+94.90504284840947,8276.893478175964
+98.0,8926.834481200078
+98.45771971661546,9026.159660320951
+99.00445620008144,9143.161264903
+99.28109141376301,9202.084566591078
+99.44018044681117,9235.811440487609
+100.0,9339.378059743658
+101.0,9552.378059743658
+102.0,9794.378059743658
+102.12348088729176,9824.630879031707
+102.2744579435128,9861.167326866545
+103.0,10036.022960379383
+104.0,10278.022960379383
+105.0,10524.022960379383
+106.0,10779.022960379383
+106.52090628057714,10920.188560599709
+107.0,11044.752929391674
+107.08328364038047,11066.48995936142
+107.46857668671801,11163.583807280254
+108.0,11296.971058834546
+109.0,11581.971058834546
+110.0,11875.971058834546
+110.27692342529177,11960.709629344708
+111.24579659301354,12254.278195154837
+112.0,12482.047625719419
+113.0,12818.047625719419
+114.0,13157.047625719419
+114.13005541491468,13203.737517615418
+114.38941453980834,13296.06936916
+114.44466531112124,13315.020381241255
+115.59022251232807,13706.800944939128
+115.60825721192168,13712.770431978382
+118.0,14482.911608860964
+120.0,15144.911608860964
+120.000002,15144.912276860965
+
+					</series>
+					<series title="" type="l" color="0xff5050" encoding="csv">0.0,0.0
+3.0,0.0
+3.1355461612093944,0.2710922914461222
+5.0,2.1355461612093944
+6.577566531483678,10.023378703843331
+6.953911791983363,10.776069203914684
+8.0,11.822157433635283
+10.0,15.822157433635283
+11.0,21.822157433635283
+12.0,30.822157433635283
+12.226698992249242,33.995943278183375
+12.2521581539386,34.27599399576159
+12.307078430249778,34.82519677134242
+14.0,50.06149097103454
+14.225456359542639,52.316054552827026
+15.0,59.28694733905582
+16.0,75.28694733905581
+18.0,109.28694733236242
+18.652363607850123,121.68185590875305
+19.0,127.93931093945274
+20.0,157.93931093945275
+21.0,198.93931093945275
+21.391654480464897,221.26361625600182
+21.391824919873024,221.27282016281399
+22.0,253.5060992993656
+23.0,307.5060992993656
+24.0,364.5060992993656
+25.0,423.5060992993656
+25.72614887663879,468.52732897648025
+29.001937682548512,629.0409805000209
+29.24822684667445,640.3702826339629
+29.687055798295034,660.1175849273671
+30.058048020786845,675.6992584424828
+30.617977996887944,697.536527628066
+30.63698354055614,698.2587383320748
+31.0,711.6903473568242
+33.0,787.6903473568242
+34.0,826.6903473568242
+36.0,930.6903473568242
+36.76730125939493,971.357313185939
+37.0,983.4576486020095
+38.0,1038.4576486152052
+38.133523485020326,1045.9349638048996
+40.0,1148.5911721035304
+41.0,1204.5911721035304
+42.0,1266.5911721035304
+42.92004973986916,1329.1545547387861
+43.07587573079076,1338.971591582645
+43.19428576332649,1344.8920929630278
+43.41351244743917,1353.4419334884312
+43.83618088207374,1368.6579974668502
+45.0,1409.391666742417
+46.0,1449.391666742417
+46.132041571650106,1454.8053710274676
+46.31277771704662,1462.034817213432
+47.0,1486.0875969197868
+47.34040574300099,1499.7038266607228
+47.56378995367364,1508.4158108393178
+48.0,1523.246952434658
+50.0,1597.246952434658
+51.04521068034636,1641.1458004830629
+51.48301948826315,1658.2203443408362
+51.924908175405754,1671.4770049077867
+51.940327692326186,1671.831653758709
+53.0,1695.1444446711275
+54.0,1724.1444446711275
+54.92947311444287,1757.6054765684319
+54.96089439734868,1758.6423789065304
+57.0,1823.8937583956579
+58.68108319789744,1894.4992528095452
+58.85224414245758,1900.147563753822
+59.0,1903.9892161646728
+59.95569257968287,1929.7929158911274
+59.96152288311798,1929.9211822806444
+60.0,1930.6522476974171
+61.0,1951.6522476974171
+62.0,1975.6522476974171
+63.0,2005.6522476974171
+63.80556465994855,2032.2358816781405
+64.0,2038.068941691191
+66.0,2108.068941691191
+66.2644592207651,2120.4985247505306
+67.0,2151.391237764112
+67.38872948710377,2169.6615232565805
+67.5065162015388,2174.844139138013
+67.97388805246699,2191.2021537531277
+70.0,2247.9332883674183
+70.804104880856,2272.8605394958995
+71.0,2278.345603000722
+71.30291278990344,2287.7358992239638
+71.60920996936693,2296.3122206186445
+74.0,2360.8635513152403
+74.03855552577954,2362.2129946918367
+74.08860729697193,2363.8146512599988
+76.0,2423.067825182191
+76.22798323057835,2430.363288695467
+78.0,2485.2958084183538
+79.0,2524.2958084183538
+79.39116100535627,2545.8096632986594
+79.48229844890906,2550.184260900467
+79.70223240871573,2560.521156847417
+80.0,2573.0273958773673
+80.41563182626028,2595.0558822052394
+80.43716129407562,2596.1323560613673
+81.0,2623.7114526171126
+82.0,2686.7114526171126
+83.0,2764.7114526171126
+84.0,2845.7114526171126
+87.7138993292032,3165.1067940697862
+88.94018531507632,3264.43595875085
+88.99190803157097,3268.470330719127
+90.0,3346.093413149963
+91.0,3440.093413149963
+93.0,3638.093413149963
+95.0,3838.093413149963
+96.0,3958.093413149963
+96.33957632069169,4005.9736749173685
+97.0,4098.432989468723
+99.0,4392.432989468723
+100.0,4563.432989468723
+101.23779153023304,4787.473257200432
+101.9431142650549,4911.610057706467
+102.0,4921.109975524673
+102.11949792080766,4944.053576136482
+102.44259025840418,5003.825659236126
+102.46712490615788,5008.290965953468
+102.54295089109532,5022.015467474495
+102.58210528145563,5028.123552219127
+104.0,5242.225655258836
+105.10498986804541,5412.394094124773
+105.20969941526961,5428.205235931644
+107.0,5696.7503242569355
+109.0,6046.7503242569355
+110.0,6222.7503242569355
+110.71693827839945,6354.6669691259
+110.78634541611268,6367.368472952481
+111.0,6405.398989606545
+111.7543698670312,6541.185565019304
+111.8230525640095,6553.3424042523675
+112.0,6584.4851517674315
+113.0,6788.4851517674315
+114.59413888401671,7159.919511001205
+115.04777441030598,7265.162955262998
+115.6477558548876,7386.9591887611905
+115.92958455136713,7443.324924268382
+119.0,8054.337600855544
+120.0,8282.337600855544
+120.000002,8282.338118855545
+
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>simulate 10 [&lt;=HORIZON] {Q} under opt
+</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2021-04-06 01:01:06 +0200">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+				<option key="--diagnostic" value="-1"/>
+				<option key="--backwards-order" value="1"/>
+				<option key="--priority-order" value="0"/>
+				<option key="--generate-strategy" value="2"/>
+				<option key="--extrapolation" value="0"/>
+				<option key="--hashtable-size" value="27"/>
+				<option key="--filter" value="0"/>
+				<option key="--learning-method" value="4"/>
+				<option key="--good-runs" value="200"/>
+				<option key="--total-runs" value="500"/>
+				<option key="--runs-pr-state" value="100"/>
+				<option key="--eval-runs" value="100"/>
+				<option key="--max-iterations" value="30"/>
+				<option key="--max-imitation" value="5"/>
+				<option key="--reset-no-better" value="10"/>
+				<option key="--max-reset-learning" value="3"/>
+				<option key="--qlearning-alpha" value="2"/>
+				<option key="--split-upper-t" value="1.75"/>
+				<option key="--split-lower-t" value="0.15"/>
+				<option key="--split-ks" value="0.25"/>
+				<option key="--split-filter-rate" value="0.02"/>
+				<option key="--split-filter-val" value="0.99"/>
+				<option key="--discount" value="0.99"/>
+				<option key="--random-search-limit" value="0.5"/>
+				<option key="--deterministic-search-limit" value="0.5"/>
+				<option key="--indifference-scale" value="0.005"/>
+				<option key="--indifference-smoothing" value="10"/>
+				<option key="--lower-delta" value="0.01"/>
+				<option key="--upper-delta" value="0.01"/>
+				<option key="--alpha" value="0.05"/>
+				<option key="--beta" value="0.05"/>
+				<option key="--epsilon" value="0.05"/>
+				<option key="--u0" value="0.9"/>
+				<option key="--u1" value="1.1"/>
+				<option key="--histogram-bar-width" value="0.0"/>
+				<option key="--histogram-bar-count" value="0"/>
+				<option key="--resolution" value="4000"/>
+				<option key="--discretization" value="0.01"/>
+				<option key="--truncation-error" value="0.01"/>
+				<option key="--truncation-time-error" value="0.01"/>
+				
+				<plot title="Simulations (10)" xaxis="time" yaxis="value">
+					<series title="Q" type="l" color="0xff0000" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,2.0
+3.0,5.0
+3.1969942191049516,6.378959369044306
+3.262259520956278,6.770551118023836
+4.163868870110007,9.475379250656397
+5.0,11.147641503100528
+5.264686053054967,12.735757655676569
+6.0,16.412327534451535
+6.117873000596335,17.708930367464284
+7.0,26.530200523420206
+7.111412626975409,27.755739357306222
+8.0,36.641613147357766
+9.0,53.641613147357766
+12.0,131.64161314431857
+14.0,205.64161314431857
+14.264394589853906,218.8613424125469
+14.344630864219209,222.79291955854623
+14.405448424987751,224.98235222592803
+14.745336339336353,233.4795500702845
+14.795605104498225,234.28385034507633
+14.913314331486271,235.34323328577898
+16.0,239.68997598977262
+16.224107400532677,240.81051302207766
+16.229516695618994,240.8213315812538
+17.0,241.59181488679346
+18.0,244.59181488679346
+18.037599047534098,244.93020632557395
+18.85423328480116,249.83001176536877
+19.0,250.55884531648277
+20.0,256.55884531648275
+21.0,265.55884531648275
+21.122539690171422,266.78424223432586
+21.1711837476761,267.1247506545327
+21.265558029201756,267.69099634402085
+22.0,271.3632061853479
+22.837013072263453,276.38528457565957
+25.0,287.20021924634574
+25.72597441474947,291.5560657323669
+26.0,292.9261936595756
+27.17032346232369,299.9481344013116
+28.0,304.0965171198225
+29.0,314.0965171198225
+30.08591546422287,326.04158717431704
+30.286897176740858,327.24747743752
+31.0,329.3867859258955
+32.0,335.3867859258955
+33.0,344.3867859258955
+34.69079677463737,361.2947537134604
+35.0,363.4591762600849
+35.30582245443379,366.5174007017903
+37.0,381.76499871487965
+38.0,393.76499871487965
+38.520661229205,402.61623945892956
+38.68435481600642,404.90794977951754
+38.80827815866024,406.5189532968257
+39.0,408.05272799496527
+39.20320832348182,410.6944361411292
+39.82621388908545,416.92449180017775
+40.0,418.4885668411538
+41.0,428.4885668411538
+42.0,439.4885668411538
+43.0,453.4885668411538
+43.15075050576493,456.80507803224407
+43.33703284107999,459.59931306787877
+43.39495320855201,460.1785167724818
+44.0,465.6239378394796
+44.41760919546694,469.8000297354439
+46.0,480.87676541084807
+47.0,490.87676541084807
+47.56816243459571,498.2628770993069
+47.63550220540024,498.93627478448184
+49.0,511.2167549373671
+50.0,521.2167549373671
+51.0,536.2167549373671
+51.8977555725086,550.5808440138757
+52.0,551.7055327580856
+52.68229336979646,566.0336932663757
+53.0,571.1169995542703
+54.0,590.1169995542703
+55.0,617.1169995542703
+55.11477114119034,620.7896757988749
+55.452585214977546,629.9106560570858
+56.0,643.0486108693132
+56.248876540421584,652.5059191991699
+58.0,717.2974873953669
+59.0,755.2974873953669
+59.86124254592614,790.6084317952362
+59.976614752509185,794.992575485154
+60.0,795.8578297856744
+63.0,918.8578297856744
+63.989300034062786,962.387031431543
+64.0,962.8257299090565
+64.04436484960333,964.8665131119961
+65.0,1007.8700947550634
+67.0,1099.8700947550635
+68.0,1163.8700947550635
+69.0,1239.8700947550635
+69.50582975522907,1279.8306455182537
+69.58393305135002,1285.6102888679488
+69.87777701372073,1304.1224584084675
+70.0,1311.4558380532894
+70.48608064251685,1348.3979667653043
+70.51083390168557,1350.1554477697084
+71.0,1380.4837463076444
+71.62043888323129,1422.0531512386585
+73.0,1504.826818469318
+74.0,1567.826818469318
+75.0,1637.826818469318
+75.18129095711147,1651.0610579725803
+75.76448637722817,1691.8847375387577
+75.92103087023816,1701.1208631270629
+76.0,1705.0693193292395
+76.02882604396864,1706.7700557165952
+76.18259995856839,1715.6889422039003
+76.62269372905048,1737.2535377446093
+76.77882094570315,1743.8108807246592
+77.21254512399675,1759.8586751010134
+77.48940381073584,1769.271870722
+79.0,1819.1215448982543
+80.0,1857.1215448982543
+80.15769991990602,1864.5334408286585
+80.58178851521778,1882.3451618937092
+80.86253307660559,1893.2941996421762
+81.0,1898.5179430683672
+81.15629309630798,1906.3325978150776
+81.45890088223958,1920.5551638269487
+81.59851218019863,1925.5811703803672
+81.9352438793106,1937.366779801112
+82.0,1939.0504390936728
+82.9088284462651,1970.8594345658503
+83.0,1973.2298950687868
+83.09857065372843,1976.1870145536593
+83.82138180535118,1992.8116709608212
+84.0,1996.0267986058502
+85.0,2019.0267986058502
+86.0,2049.02679860585
+86.78432102204808,2074.909392041531
+87.0,2081.3797616485444
+87.25120635747628,2089.669570955495
+87.2715725699918,2090.2805575575303
+88.0,2111.4049532348363
+89.0,2145.4049532348363
+90.0,2195.4049532348363
+90.01163037780083,2196.0911449861405
+90.41578811846294,2216.299032449077
+90.9310522666137,2238.455390630254
+91.0,2241.0754046901407
+91.83244764474243,2273.5408628543687
+93.0,2315.5727476197085
+94.0,2358.5727476197085
+94.86702309569115,2404.524971532127
+97.0,2515.439770714205
+98.01180264884945,2569.0653109949644
+98.14427780817542,2574.8942183539634
+98.21249245927982,2577.827448007836
+98.75701011842405,2596.341048472822
+98.93111504060262,2601.041881537708
+99.0,2602.4195806169487
+100.10599342162837,2632.281403095496
+100.21641768436847,2634.710736708595
+100.44688972008649,2639.089705397673
+101.0,2645.7270287953042
+102.0,2667.7270287953042
+103.0,2690.7270287953042
+104.0,2719.7270287953042
+104.19569460661754,2726.380645122885
+104.48090485449765,2735.792583764241
+104.85145347402553,2746.909042126723
+105.0,2751.2168914451267
+106.0,2781.2168914451267
+107.0,2818.2168914451267
+107.28219601655321,2830.069124412418
+107.56227375576563,2840.4320001601127
+107.65864481604925,2843.7086165737087
+108.0,2854.9733376227855
+109.0,2889.9733376227855
+112.0,3012.9733376227855
+113.0,3058.9733376227855
+113.02018819868864,3059.92218288853
+113.10597566026712,3063.525256313822
+113.32872269991785,3072.2123907482396
+113.39057063278146,3074.5626122301906
+114.0,3097.1114989074176
+115.0,3146.1114989074176
+116.0,3200.1114989074176
+117.0,3264.1114989074176
+117.40787661843602,3296.741628433127
+117.59598046010548,3310.849416962758
+118.0,3339.938823398468
+118.2652913529858,3359.8356751593037
+118.505376914611,3377.1218356919003
+120.0,3483.240074394673
+120.000002,3483.240222394673
+
+					</series>
+					<series title="" type="l" color="0xff0909" encoding="csv">0.0,0.0
+1.0,0.0
+2.231430666952948,1.231430666952948
+3.0,1.231430666952948
+3.6085346269846243,1.8399652920191052
+4.0,1.8399652920191052
+5.0,2.839965292019105
+5.575451707175784,5.71722373798916
+6.0,7.415416947292444
+7.0,12.415416943675117
+8.30449493418182,20.24238637806265
+8.322981765387917,20.297846945968292
+9.0,21.651883429677646
+11.0,27.651883429677646
+11.23897134932444,28.846740103427912
+12.0,31.890854765394046
+13.0,41.890854765394046
+14.128063290924347,58.81180411304295
+14.554437233135767,64.78103929993085
+14.688611375133267,66.2569548733838
+15.0,69.37084112673053
+16.0,86.37084112673053
+16.2506909501096,90.88327806076144
+17.0,103.62153206213638
+17.06624021345674,104.88009614285824
+18.0,121.68777227179413
+20.0,163.68777227179413
+22.0,225.68777227179413
+23.0,270.68777227179413
+23.09149830953568,274.8966941698582
+26.0,405.77927058017116
+27.0,456.77927058017116
+28.500725772363797,537.818462064119
+28.69807552621796,547.4885999703116
+29.74697577134397,595.738011102966
+29.790452409800967,597.6944600799274
+31.969334688487525,693.5652803612633
+32.03232269308791,695.6438845999074
+32.31573445735027,702.4457670099939
+32.348954180433616,703.0105022277259
+33.35154898556047,715.041639895073
+34.0,720.8776990340455
+34.37275301069806,724.6052291325667
+34.91773234722816,729.5100430532523
+36.0,738.1681843794843
+37.0,747.1681843794843
+37.29791815325524,752.2327927024693
+37.31848113974796,752.4795487615879
+37.44343463897951,753.6041302693037
+38.0,758.0566531306887
+39.0,771.0566531306887
+41.0,809.0566531306887
+41.51145966851917,822.8660643065951
+41.89947027216467,830.6262762260922
+42.01296221831665,832.3286553945342
+43.0,844.1731088187512
+44.0,860.1731088187512
+45.15468042042479,882.1120367709627
+45.345196621071736,884.7792636354465
+45.7176371696522,888.8761095869369
+46.0,891.6997379461573
+46.20885806090243,893.9971765974811
+48.0,911.9085960097
+49.0,929.9085960097
+50.04621116928837,950.8328193407593
+50.12088216812515,952.2515682987821
+51.0,966.3174536649684
+52.0,985.3174536649684
+54.00577787547941,1037.4676782859988
+54.67341562325254,1052.8233464889495
+54.74005796488603,1054.2894781188218
+58.0,1103.188608649886
+58.326585269218796,1108.413972790467
+59.0,1117.1683644227091
+60.0,1133.1683644227091
+61.0,1157.1683644227091
+62.0,1184.1683644227091
+65.0,1301.1683644227091
+65.50255472889057,1324.2858816406729
+65.75128643608353,1333.9864180105944
+66.22949147018913,1350.245389263546
+66.87237431379572,1367.6032260049642
+68.0,1394.6662427410763
+69.21590103209178,1429.9273726168994
+69.51573799355114,1438.3228071720628
+69.65236816857518,1441.465301581112
+70.0,1448.417938171772
+70.26353176982066,1454.479168749176
+71.0,1470.6814699346094
+72.0,1499.6814699346094
+73.0,1529.6814699346094
+73.46327142903279,1547.7490553094183
+73.52567469742858,1549.9955733334953
+73.80531441207631,1558.6644040839988
+73.96275268639629,1563.0726762905804
+75.0,1591.078353580708
+76.0,1619.078353580708
+77.0,1661.078353580708
+77.16535409474652,1668.519287463496
+77.41587762516268,1679.0412758919642
+77.94288297629181,1700.6484955273543
+78.0,1702.8189423967856
+78.54339002667007,1725.0979334465453
+78.71813563197864,1731.7382657951769
+79.0,1742.1672480772409
+79.25524073891155,1752.1216367129352
+82.0,1856.4224888177077
+83.0,1898.4224888177077
+86.0,2033.4224888177077
+87.0,2081.4224888177077
+87.03170095096101,2083.1026390329353
+87.19662705161895,2091.348943911403
+88.0,2127.5007268826444
+89.0,2177.5007268826444
+90.0,2239.5007268826444
+90.005263663614,2239.895501059318
+90.23179387796459,2253.9403747790134
+90.32833997935997,2258.864225983191
+91.0,2287.073946866481
+91.06519432765933,2290.2684689207085
+91.66341219683981,2315.3936191844027
+91.84670690639717,2322.1755238016726
+92.0,2327.387488843113
+93.0,2370.387488843113
+94.0,2416.387488843113
+94.29658964397655,2434.1828665102394
+94.53227372812226,2447.145491885127
+95.0,2468.6609005132054
+95.90886416655373,2523.192750333595
+96.0,2528.022949662609
+98.0,2646.022949662609
+99.27288388705699,2727.487518291368
+99.31631783341936,2729.7895175269987
+99.66831835929965,2748.0935450957727
+99.91096008474742,2758.5271389403188
+100.0,2761.7325760574313
+101.0,2811.7325760574313
+102.6716656689567,2907.017519364786
+103.2714861257063,2938.208182967964
+103.42875477394155,2945.9143466964183
+104.0,2973.3341175620635
+105.0,3030.3341175620635
+106.16817718070219,3120.2837599388226
+106.47017441786545,3140.819572238141
+106.59456042143037,3148.407118846
+106.6668351463369,3152.4545032897577
+107.0,3168.779581156482
+107.1861328924105,3180.3198207934183
+107.64058202229265,3207.1323188816446
+107.90165310474356,3222.274441832708
+108.10530033802083,3233.0677455221403
+108.43259881761101,3249.4326695406453
+109.0,3277.235327232063
+110.0,3327.235327232063
+112.52298311225856,3455.907465945822
+113.40887168736309,3500.20189464329
+113.98425870327027,3521.4912142800763
+114.0,3521.9004879944177
+114.17950431107928,3528.5421477440636
+114.41204324355476,3534.588159768708
+116.0,3561.5834246584677
+117.0,3582.5834246584677
+119.0,3642.5834246584677
+120.0,3683.5834246584677
+120.000002,3683.5835166584675
+
+					</series>
+					<series title="" type="l" color="0xff1212" encoding="csv">0.0,0.0
+1.0,0.0
+2.3206349488205733,2.6412699068561802
+3.0,3.3206349488205733
+3.5023076418322328,4.325250232546951
+4.0,4.822942596250512
+4.286424151975706,5.395790875460118
+5.0,6.109366740710045
+5.449800575916091,7.008967843026551
+7.0,8.559167289691306
+8.0,10.559167278839325
+12.0,30.559167278839325
+13.0,41.559167278839325
+13.359891092388214,48.39709795393411
+13.410488126149268,49.00426239679996
+13.469219684658489,49.650309512204586
+13.83085498966223,51.82012133504087
+13.846357737589589,51.866629568792376
+15.0,54.1739141115588
+15.230997818979718,55.55990094395331
+16.0,59.40491192232552
+19.0,92.40491192232552
+19.276366120645783,97.37950200272701
+20.0,105.33947472238114
+20.113320829883403,106.69932473285508
+20.35357431337471,109.34211295134321
+21.0,113.22066709966589
+21.680215738577633,120.70304029337642
+22.52748628017213,125.78666350069498
+22.71581733007948,126.35165665638269
+24.0,128.92002199966177
+24.3656996949389,130.0171210486182
+26.0,133.2857216802958
+26.986300017113976,139.20352173486705
+28.0,144.27202169395827
+28.59865062519738,148.46257606481782
+33.0,174.87067231383702
+34.0,183.87067231383702
+35.0,197.87067231383702
+37.0,227.87067231383702
+38.0,249.87067231383702
+39.0,280.870672313837
+40.0,312.870672313837
+41.0,355.870672313837
+42.6552172462941,432.0106652158377
+43.0,444.07806192570285
+44.0,482.07806192570285
+45.44925404066811,541.4974774952235
+45.646439759293116,548.9905346019185
+47.0,599.0722637944177
+48.0,641.0722637944177
+50.78085088080979,774.5531055202586
+51.0,783.9765181434464
+53.0,901.9765181434464
+54.0,967.9765181434464
+57.0,1180.9765181448213
+57.129311813267904,1193.0025159707861
+57.65677649236918,1235.1996904625305
+58.24854576621833,1276.031770963077
+59.0,1321.1190248619637
+61.000209322428454,1447.1322124189494
+61.26554877882912,1461.4605422377863
+61.97465884355459,1496.2069363483672
+62.0,1497.2712645934027
+62.465204975075785,1519.1358979858219
+62.592562935762345,1524.484932350013
+63.0,1540.374978202432
+64.0,1580.374978202432
+65.02564040341129,1624.477515411417
+67.0,1707.4006186080762
+69.0,1793.4006186080762
+69.08986742817213,1797.7142551007862
+69.13354066717893,1799.5922043597727
+70.0,1830.7847403989635
+70.03542922182757,1832.485342911191
+70.82747419292956,1866.5432766408994
+70.83624727890123,1866.8942000745944
+71.0,1873.280556335496
+71.37656217369324,1888.3430430971262
+71.66730457564462,1899.1005116983827
+72.40022342287654,1925.485590444496
+75.0,2016.4777708229353
+75.03775418538737,2018.063446707963
+75.35876877546836,2031.225044320141
+76.7442065111366,2081.100802967077
+76.85207415842729,2084.6604354521264
+76.88133446955459,2085.421203836658
+77.0,2087.9131798094177
+79.11924051655393,2134.536471263963
+79.69241422687386,2143.1340768023038
+82.0,2166.2099345698853
+83.55916178884365,2183.3607142519636
+84.0,2187.769096355255
+85.0,2207.769096355255
+86.0,2228.769096355255
+87.0,2250.769096355255
+87.77081392978693,2278.5183974503534
+87.86301277532517,2281.192164253255
+88.0,2284.479857666176
+88.404556935594,2295.4028946105304
+88.93417468982013,2308.113720933722
+89.0,2309.627703125141
+90.0,2333.627703125141
+91.0,2371.627703125141
+91.8845926692652,2414.9727439915946
+92.04125052715678,2421.865689089949
+92.23798437957373,2430.325244923354
+92.294247930863,2432.575787348773
+93.0,2460.1001180301278
+93.67429979312124,2487.072109587432
+94.0,2499.7744178185317
+95.0,2544.7744178185317
+96.6724173713937,2641.7746256382397
+97.0,2659.7916699529987
+97.00367001026099,2660.004529883431
+97.16117232234744,2668.6671572133046
+97.7296440024562,2699.364628105191
+97.89186049734134,2706.015504490772
+97.93039916916472,2707.5570510933535
+98.0,2709.575475470191
+99.0,2739.575475470191
+100.0,2770.575475470191
+100.16328205865956,2777.433321938141
+102.0,2852.7387575270636
+104.0,2960.7387575270636
+104.44964704436781,2993.1133441638226
+105.0,3031.087698640467
+105.17562815642154,3043.3816696685303
+105.24650823473155,3048.272394637127
+106.0,3099.509835024886
+108.31279850495193,3270.656923799821
+108.58438279528315,3286.6803968336594
+109.0,3305.7987886930778
+109.9132581136776,3348.7219201523826
+110.0,3352.7120468122544
+111.0,3399.7120468122544
+112.0,3447.7120468122544
+112.04559608180296,3449.9462550838366
+112.4142642519763,3466.167654288354
+113.0,3490.182820002673
+113.39432113704991,3507.5329502383042
+114.0,3533.577141144077
+115.0,3577.577141144077
+116.0,3637.577141144077
+116.27764694328947,3655.6241919931267
+116.34871402500029,3660.172485890708
+116.39758288110636,3663.055747821417
+116.5842125638449,3671.640713280708
+116.68196148829803,3675.0619255636734
+116.96701884875593,3684.183761389645
+117.52780589090115,3701.5681597015805
+117.73208523814993,3706.062305163318
+119.0,3725.0810266820135
+120.000002,3747.0810706820134
+
+					</series>
+					<series title="" type="l" color="0xff1b1b" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,1.0
+2.085735095366795,1.4286754821501622
+3.0,5.085735095366795
+3.182139385568422,5.9964319991776325
+6.0,17.267874484653746
+7.721248568262855,27.595365803343928
+9.0,33.98912302995277
+10.0,44.98912302995277
+11.0,56.98912302995277
+11.527039588161418,64.89471671978563
+11.701630340385755,66.64062424586454
+12.0,68.7292119292475
+13.0,80.7292119292475
+15.0,110.72921192255409
+16.0,135.7292119225541
+16.302258713589797,144.79697334070852
+19.0,223.03147063710637
+19.161741503165626,228.85416488482886
+19.205542805527728,230.12440267038295
+20.196286077242505,253.90224090073883
+20.38473728267461,257.8597163787853
+25.0,350.1649707205437
+26.0,371.1649707205437
+27.277301788424246,409.4840241109519
+27.332907701993715,410.9853837635469
+27.667895406206842,419.6950644269811
+27.93586484749052,424.25054485784875
+28.0,424.8918963894843
+28.04295695407124,425.62216456035424
+28.273661950327938,427.92921455993906
+28.473011474154216,428.92596219025376
+28.70794113094247,429.3958214641339
+29.0,429.687880347401
+29.283461245744522,430.25480283534324
+30.0,430.9713415847743
+31.0,435.9713415847743
+35.0,459.9713415847743
+37.0,479.9713415847743
+37.94989395355218,490.42017503305556
+39.0,498.8210234452346
+40.0,509.8210234452346
+41.0,523.8210234452346
+41.02271561096438,524.2526198564605
+41.91945279917337,536.806940646497
+42.0,537.6929598380856
+43.0,551.6929598380856
+44.40345832582767,578.3586680914534
+44.816588505246614,584.1424905629533
+45.0,586.160016994336
+46.0,600.160016994336
+47.0,624.160016994336
+47.588466891427416,642.4024904300871
+47.66589378337556,644.7252973653195
+47.9837058782819,652.6705996713331
+51.41815529709333,728.2284867275905
+52.0,736.9561574332671
+53.0,754.9561574332671
+54.0,778.9561574332671
+55.0,805.9561574332671
+55.73269210807143,829.4023050295882
+55.76084572141825,830.2187597431484
+56.0,836.915079497688
+58.0,898.915079497688
+59.0,936.915079497688
+60.0,981.915079497688
+60.32512181248978,996.8706822430864
+60.430100637827834,1001.384772028417
+61.0,1025.3205455296088
+64.0,1178.3205455296088
+64.8333960143204,1227.4909101305452
+65.0,1236.1543176012397
+65.38752444400167,1257.468162259112
+65.59405715962284,1267.7947974675803
+65.68422121627756,1272.032507818496
+66.0,1286.5583325006587
+67.0,1343.5583325006587
+68.0,1413.5583325006587
+68.13124785688619,1425.3706387089987
+68.15818353899108,1427.7679149223677
+68.435647248601,1450.5199390302537
+68.6435178665446,1466.525976970367
+68.97076201293893,1490.742044183787
+69.19303771617734,1506.9681704849643
+69.4165581061458,1519.932352902963
+69.48398252101443,1522.9664511891262
+69.50352422737105,1523.630869101
+71.0,1561.0427636943828
+72.0,1593.0427636943828
+72.55276943626032,1615.706309952772
+72.91856305846136,1628.1432932791263
+73.08716637414484,1633.0327895396579
+73.6234190642745,1646.9753593905446
+74.0,1656.3898830412395
+75.0,1692.3898830412395
+76.03842330312693,1730.8115451695446
+76.74884162946489,1756.386604958963
+77.0,1762.6655642508213
+77.39560895486049,1772.951396919191
+77.50461412153868,1774.8044847633685
+77.96619526695741,1779.4202962765453
+78.0,1779.5893199378218
+78.35209419964637,1784.166544478546
+79.0,1789.349790922963
+81.0,1817.349790922963
+82.0,1841.349790922963
+83.0,1871.349790922963
+84.0,1910.349790922963
+85.0,1950.349790922963
+85.0162812230602,1951.1801333549502
+85.64862072245782,1976.473713509531
+85.68912101400963,1977.7292222109495
+85.9288745528686,1984.9218284678852
+86.0,1986.5577137995951
+86.73364545752068,2004.8988503022051
+86.83235290315714,2007.267828782481
+88.0,2029.453123743191
+89.0,2053.453123743191
+90.0,2084.453123743191
+90.74640197282888,2109.8307909515943
+90.76036424980066,2110.2915459881406
+91.0,2116.5220754753677
+91.00306044627486,2116.6169491986093
+91.14584422409915,2120.3293276078502
+91.15973398659,2120.6487918740627
+91.2378152499239,2122.0542547276577
+92.0,2133.4870260081902
+93.0,2149.4870260081902
+94.37994982715001,2178.465972126496
+96.0,2210.8669758244955
+97.0,2237.8669758244955
+98.0,2273.8669758244955
+98.47498272411977,2292.3913020245445
+98.59622671096035,2296.028621740013
+99.0,2305.315407324545
+99.4353465172619,2318.375802907177
+100.0,2331.3628329642397
+101.0,2361.3628329642397
+102.0,2394.3628329642397
+102.58361488663874,2417.7074282616095
+103.0,2433.1136776085805
+103.55903469399233,2454.356995590822
+103.56231490585508,2454.4718034835446
+103.84165399228611,2463.969332618141
+104.0,2469.194750564
+105.12933252529264,2507.5920562636593
+107.0,2569.324083093417
+108.0,2611.324083093417
+109.0,2664.324083093417
+109.48022631505808,2694.578341059254
+110.0,2726.8043094080626
+110.02965917921,2728.7024971967853
+110.19391327379884,2737.4079638483036
+111.0,2772.875779874
+111.27104407407862,2785.6148514885454
+112.0,2819.1468239598994
+113.0,2868.1468239598994
+114.0,2919.1468239598994
+115.0,2975.1468239598994
+115.13118647546061,2982.886825493673
+115.20095585649699,2986.7939114045944
+115.55778212928315,3006.419355803367
+115.90733426141549,3023.896962875417
+116.0,3028.4375840716593
+118.65702307779951,3195.830038098354
+118.75348340246062,3201.617656932964
+118.75586206933602,3201.7579994923826
+119.0,3213.964895440417
+119.79849604986478,3254.6881935530137
+120.0,3264.7633914841404
+120.000002,3264.7635114841405
+
+					</series>
+					<series title="" type="l" color="0xff2424" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,1.0
+2.163640555754832,1.4909215866893364
+3.0,3.163640555754832
+3.1794949498602203,3.702125331078012
+4.0,5.343135471164049
+4.555849442497509,8.678232005180755
+5.0,10.898984879845749
+7.0,22.89898487984575
+7.2614471390408655,24.72911486453635
+7.3759358483149295,25.41604704120967
+8.142092340934411,27.714516458625116
+9.0,29.430331848460117
+11.081073491020126,39.835699214199835
+11.352509594058576,40.37857143464458
+11.820922350438702,40.84698420559521
+13.0,40.84698420559521
+13.603971898387677,42.05492799512003
+14.0,42.450956097891016
+15.0,44.450956097891016
+18.0,53.450956097891016
+19.0,59.450956097891016
+20.0,66.45095609789102
+22.404122021372924,90.49217625586525
+23.0,95.85507810277497
+25.0,115.85507810201517
+25.17844050003592,118.17480461095259
+26.0,128.0335186045961
+27.817165803574678,151.6566740308661
+28.0,153.85068440381465
+30.879959649892523,205.6899579714297
+31.0,207.49056334412057
+31.435318285999205,216.19692903965708
+32.0,226.92588161499214
+33.0,249.92588161499214
+34.0,275.92588161499214
+34.33020250850965,287.1527663471942
+35.14582432967782,310.8057995263281
+35.30825335679346,314.3792382362538
+35.37813362151898,315.70696301617363
+35.40661798421921,316.21968157306344
+35.68493143123392,319.8377565342125
+36.0,322.9884422153972
+37.0,340.9884422153972
+38.0,359.9884422153972
+38.45474625260346,369.9928597579068
+39.87715509045644,394.17381009150483
+41.0,409.893638756921
+42.64012573396583,445.9764049234597
+43.87639397186236,469.4655012261696
+45.0,489.6904099300858
+46.0,513.6904099300858
+46.28994463400612,521.5189150920296
+46.56635594278921,528.1527863161228
+46.75316944426399,532.4494967671573
+46.76995496615047,532.7516363523908
+47.2890173425548,541.575696585982
+47.42463550313522,543.4743508331136
+49.0,563.9540894071275
+51.0,591.9540894071275
+51.21043991635342,595.110688202695
+51.56248670480689,600.0393430846214
+52.0,604.8519894060944
+53.0,616.8519894060944
+54.0,631.8519894060944
+54.018390542605914,632.1830192747022
+54.37485581605882,636.8170677616775
+54.51299220113643,638.1984315329074
+56.0,651.5815017848241
+57.0,661.5815017848241
+60.0,706.5815017848241
+60.06783985874501,708.0739785563472
+60.393151605046825,712.9536547888987
+60.79704166775268,718.6081156527155
+61.0,720.4347406754137
+62.0,732.4347406754137
+62.21976484575937,735.2916837493075
+62.84764931003538,742.8262971745311
+63.0,744.1974534511903
+64.0,757.1974534511903
+65.01553418719845,771.4149321380518
+65.4531931494002,776.2291806623043
+66.0,781.6972491630152
+68.0,811.6972491630152
+69.0,827.6972491630152
+70.49718750023762,860.6353741434598
+71.0,871.1944366763037
+71.38347858861042,879.6309655252933
+73.0,913.5779152499447
+74.0,939.5779152499447
+74.74315836165394,964.1021412742409
+74.99356824333373,971.6144375482996
+75.44774444976008,984.7855476970761
+75.96880676784562,996.2489184718386
+76.0,996.7792035480843
+77.0,1020.7792035585304
+78.16702407887266,1049.9548054144955
+81.0,1117.9462276280776
+82.0,1146.9462276280776
+82.0000732302477,1146.9484246575305
+82.33278073909374,1154.6006970328212
+83.0,1167.945082450645
+83.33641896206036,1177.028394202176
+83.39745945257656,1178.6154472532544
+85.0,1212.2687986815317
+86.0,1234.2687986815317
+86.36004947009422,1243.9901341951277
+86.67868449802236,1252.2746449831263
+86.75613115668277,1253.746131528886
+86.80127168542988,1254.3780989475454
+88.08515986528865,1268.500868931772
+89.0,1277.6492702873684
+89.14057886931407,1279.1956377779643
+92.0,1307.7898491523536
+92.15468958497372,1310.5742616310129
+93.0,1324.9445387310634
+94.0,1342.9445387310634
+95.23887477339663,1366.483159373176
+95.2875945910672,1367.3601161347092
+96.37748403738505,1379.348899984191
+96.94481450909936,1382.7528828250129
+97.0,1382.918439309836
+97.57401550034872,1386.362532237722
+98.0,1387.6404857741904
+98.590985427594,1390.0044274395445
+102.0,1400.231471187127
+105.0,1418.231471187127
+105.64416130117209,1424.6730842558502
+105.76713539465794,1425.533902789241
+105.80880185119034,1425.78390154429
+106.0,1426.7398923352544
+106.03441259539879,1426.9463679376586
+107.0,1431.774304930241
+108.0,1439.774304930241
+109.69761487239717,1456.7504535993185
+110.60734104919983,1463.118536854077
+111.0,1465.4744905762902
+113.0,1487.4744905762902
+115.0,1515.4744905762902
+115.0415342677354,1516.0975046110277
+116.0,1529.516024851722
+117.0,1548.516024851722
+118.0,1568.516024851722
+119.0,1592.516024851722
+120.0,1617.516024851722
+120.000002,1617.516080851722
+
+					</series>
+					<series title="" type="l" color="0xff2d2d" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,1.0
+2.3633979565575784,2.453591674615574
+2.385329475934709,2.4755231990666604
+4.0,2.4755231990666604
+5.0,3.4755231990666604
+7.0,7.475523199066661
+11.0,27.475523195449334
+12.0,33.475523195449334
+13.0,43.475523195449334
+13.59376938287007,52.38206383707124
+13.698065526817832,53.63361773585667
+15.0,67.95489685949194
+16.0,80.95489685949194
+17.0,100.95489685645273
+17.22140217190657,107.37555986053356
+17.33723611773281,110.61891028617276
+17.540283034788587,116.10117691888598
+18.0,128.05381818019035
+19.0,165.05381818019035
+21.0,245.05381818019035
+22.0,286.0538181801903
+23.0,328.0538181801903
+25.0,422.0538181801903
+25.51034295852193,447.5709664358045
+26.381568408458286,481.54875844975777
+28.0,530.1017064018282
+29.863098573251158,589.7208605296308
+29.896765304803292,590.7645292901246
+30.0,593.8615702762863
+30.253024476015,603.7295244444044
+30.820133563444827,624.1454514220716
+31.0,630.4407772153195
+32.4820737961493,683.7954335527988
+33.0,701.9228510071126
+37.0,869.9228510071126
+37.095823562000625,874.0432638980666
+39.0,954.0186745571831
+40.0,999.0186745571831
+42.0,1113.0186745662545
+42.62409477300634,1149.2161716720764
+42.90209407551285,1163.3941359606451
+43.22633439450756,1178.3091898584028
+43.932788637387176,1203.035088379722
+44.184341540709944,1209.5754642329352
+44.61312541786131,1219.4374934575317
+44.762753728939806,1222.7293160738368
+47.0,1256.2880102673678
+47.77719190097459,1273.3862319207221
+48.0,1277.6195859452403
+49.0,1297.6195859452403
+50.0,1320.6195859452403
+51.0,1351.6195859452403
+51.421630138632494,1365.9550102493185
+51.56493112002803,1370.1107388897863
+51.76023259746216,1375.1885772555459
+51.822078298862365,1376.7347197266736
+51.93740613285708,1379.2719322579637
+52.0,1380.5864035088853
+52.13569823078675,1383.5717645676093
+53.0,1401.7221017405304
+54.0,1426.7221017405304
+55.0,1459.7221017405304
+55.307301291096564,1472.628756026546
+55.69335283624162,1486.9126629649986
+56.04093403781221,1498.730423990191
+56.05760517157241,1499.2805713853827
+56.17020493324029,1501.9829656094178
+56.41479441927615,1506.1409867793536
+56.5005343661703,1507.1698662912895
+56.705290827501024,1509.0126743962894
+57.0,1511.3703477881404
+57.04907133411835,1512.0573464095316
+59.0,1537.4194191168995
+60.22240188834601,1559.4226530542894
+60.22912580083979,1559.5100639889993
+60.699210645688524,1564.2109124237727
+62.0,1575.918016596241
+63.0,1592.918016596241
+64.0,1618.918016596241
+64.86278442588899,1642.2131963260135
+65.0,1644.683076514963
+65.04622346446841,1645.5613221737863
+65.1852030510217,1648.0629549138996
+67.0,1678.9145030154818
+68.0,1698.9145030154818
+69.0,1719.9145030154818
+71.0,1779.9145030154818
+72.0,1820.9145030154818
+73.0,1864.9145030154818
+73.97883194167349,1912.8772679199003
+74.0,1913.8086626994818
+74.26543282084124,1927.0803031725459
+74.44827299595914,1935.3081111967085
+74.57026407218471,1940.4317364878225
+76.0,1999.050909776595
+77.1153471079598,2064.856388894112
+78.27330553903995,2118.1224763457085
+78.43967520723503,2123.9454150652537
+79.0,2138.5138597494183
+80.0,2165.5138597494183
+82.75080033391815,2250.7886699110127
+83.0,2257.766260742367
+83.50303354111757,2276.378501375822
+84.0,2294.269294266078
+85.0,2333.269294266078
+86.0,2373.269294266078
+86.23950067814839,2385.4838289703043
+86.33127935886615,2389.1549762077093
+86.42151539150156,2391.9522930213184
+86.88411147664303,2405.830175790645
+87.31045559917808,2417.3414668617083
+87.58242291408001,2422.7808131753177
+88.0,2430.7147778976737
+89.0,2457.7147778976737
+90.0,2485.7147778976737
+90.37739212388495,2498.9235020835945
+90.70106496682413,2509.928378684367
+91.0,2519.7932349783828
+92.0,2561.7932349783828
+93.0,2604.7932349783828
+93.34375482772785,2620.605956848403
+94.0,2648.824499451304
+95.0,2700.824499451304
+96.1507248195541,2773.3201627020776
+96.25631476896102,2779.022020110028
+97.0,2813.9752261308854
+97.78306691880185,2851.5624375152543
+98.0,2860.890560652126
+99.0,2906.890560652126
+100.0,2955.890560652126
+101.17930666410635,3019.573120158964
+101.48514795232673,3035.782708277482
+101.59229300363808,3040.2828004939993
+102.56192243507766,3072.2805718445316
+104.0,3109.6705886533537
+106.61974061793684,3196.1220292512394
+107.0,3206.008773022432
+109.0,3272.008773022432
+109.02921767532807,3273.0021739256586
+109.47976148653201,3286.9690321840276
+111.0,3332.5761875361404
+112.0,3378.5761875361404
+113.0,3444.5761875361404
+113.07406093218246,3450.501061919935
+114.04335822744392,3527.075548152113
+114.28534090456675,3543.046405148708
+116.0,3637.3526553346096
+117.94097579546856,3765.457058147772
+118.0,3769.2936311410763
+120.0,3925.2936311410763
+120.000002,3925.293839141076
+
+					</series>
+					<series title="" type="l" color="0xff3636" encoding="csv">0.0,0.0
+4.0,0.0
+6.0,2.0
+10.632176945298308,25.16088474434242
+11.0,26.63217694529831
+11.167308493318178,27.468719428518437
+14.0,38.79948543669802
+16.0,48.79948543669802
+18.0,64.79948543745782
+19.0,73.79948543745782
+21.160408900916273,99.72439212857043
+21.277556701792548,100.7787223949163
+21.400086264653705,101.51389975670851
+23.0,106.31364097525358
+24.0,110.31364097525358
+24.713111509689405,115.30542153421317
+24.82640732944991,115.75860476332585
+25.0,116.27938282629265
+25.318644727583756,118.50989586736559
+27.0,128.59802754408082
+28.0,138.59802754408082
+28.108266524060365,140.00549224128227
+28.355187306109396,142.96854171141933
+29.18825953955056,150.4661917872055
+29.258505343724188,151.02815817540917
+29.400371568800626,151.73748938925223
+31.0,158.13600308828381
+32.0,167.13600308828381
+32.36328001688286,170.76880322536874
+32.44232309687516,171.1640186042504
+32.83607229232373,171.95151698961283
+36.0,175.11544470855475
+37.0,177.11544470855475
+38.0,182.11544470855475
+39.0,188.11544470855475
+40.01091938729878,197.21371910228612
+40.36244684185495,199.32288393390337
+41.0,201.23554338421815
+41.179892398393335,201.95511296482348
+41.646193219041706,203.3540154327022
+44.02293204682676,208.10749306471553
+44.264689179122854,208.34925021675593
+45.0,208.34925021675593
+46.0,209.34925021675593
+46.107116539203915,209.5634832681689
+47.0,210.45636674926644
+47.96308491013973,215.2717913046189
+49.0,219.4194516640858
+51.0,237.4194516640858
+51.002612180020414,237.4455734971102
+52.0,246.42206384258662
+54.0,280.4220638412118
+54.062123503352346,282.22364542716576
+54.41676103009878,289.31639590649945
+54.48852877876931,290.24937676083385
+54.76079777645936,292.4275286639305
+54.84602835265095,292.8536815218013
+55.0,293.46956814762706
+56.0,303.46956814762706
+58.0,343.46956814762706
+59.0,364.46956814762706
+59.80092121202149,382.0898349780938
+60.0,385.8723318053164
+60.088359874816284,387.9046087221626
+62.0,429.96069166516327
+63.0,459.96069166516327
+64.0,503.96069166516327
+64.75208029465408,550.5896698993059
+65.0,565.712771969214
+65.2269031043503,579.7807647319083
+65.64278402149051,600.9906912491728
+65.80399595859046,608.4064405660777
+66.06298511298779,619.5429738683185
+66.13222642150504,622.451108777058
+66.62125261875921,642.501182726837
+67.0,654.6210991837205
+69.17093631640964,726.261997446784
+69.25418183383916,728.426381048203
+69.32581559273918,729.9306898696975
+69.4217777443995,731.6580087354208
+71.0,758.4877870354045
+73.0,794.4877870354045
+74.0,813.4877870354045
+74.40696272876163,822.4409669334042
+75.0,834.8947497704606
+76.0,859.8947497704606
+77.01231770913469,890.2642808665819
+77.14150782089486,893.4940338092132
+77.28860955316001,896.7302718837879
+78.0,911.6694712991651
+79.0,933.6694712991651
+80.0,963.6694712991651
+80.22857408230053,972.8124345456507
+81.0,1002.8980453798367
+81.28738586680521,1017.5547242865304
+83.0,1103.1854312452895
+84.0,1161.1854312452895
+85.0,1231.1854312452895
+85.36050829729349,1260.3866032646729
+85.41579787696756,1264.6991899580628
+86.0,1309.6827540033537
+87.0,1394.6827540033537
+89.0,1566.6827540033537
+89.57433639946183,1620.0960393404184
+89.80881224393873,1639.3230574208367
+90.0,1654.4268911135953
+90.41598129270768,1696.441001819
+90.98049171680859,1752.892042861077
+92.0,1845.6672977510277
+93.0,1937.6672977510277
+93.29299668808319,1967.2599629707868
+94.0,2037.9602944369988
+95.0,2151.9602944369985
+96.0,2266.9602944369985
+97.0,2394.9602944369985
+97.59270667526965,2472.604868790885
+98.19695680438818,2543.906384462177
+98.30460149360171,2555.4243650129993
+98.7479339215283,2597.0976142533045
+99.0,2618.5232307106585
+100.0,2714.5232307106585
+101.0,2823.5232307106585
+102.0,2945.5232307106585
+102.34771762905173,2988.292498736532
+102.5717994386444,3012.9414974977867
+102.69034372701132,3024.6773825304954
+104.0,3142.546447150886
+105.24385321851436,3260.7125029191407
+105.87370200225828,3312.360103065886
+106.0,3321.3272609995315
+106.05587510756042,3325.7972693341403
+106.58780916335522,3363.564587889368
+106.6272519380549,3366.0889251214817
+108.0,3449.8265569313535
+109.0,3522.8265569313535
+109.0825422275491,3529.099766167531
+109.25796720766878,3541.554939919545
+109.56544475902965,3562.463413655949
+110.0,3591.5786144621406
+111.0,3665.5786144621406
+112.0,3750.5786144621406
+113.0,3844.5786144621406
+114.13315092761887,3956.760556185013
+114.42877792415625,3984.549493590999
+115.0,4033.1033703773674
+115.0245255805945,4035.506876473496
+115.48961292160716,4079.690174543205
+115.49247395224974,4079.959111412532
+116.0,4124.1138776708995
+118.0,4312.1138776708995
+118.22443386046358,4335.230566319383
+118.55943717841933,4368.730897713496
+118.65806918787878,4377.706410626785
+119.0,4408.480183131304
+119.13120484275372,4421.469463234076
+119.81349823265957,4482.87586771695
+120.0,4498.355514407062
+120.000002,4498.355682407063
+
+					</series>
+					<series title="" type="l" color="0xff3e3e" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,2.0
+2.8016657838364787,4.404997347672501
+3.0,4.801665783836478
+3.5163946778317716,7.383639085747802
+4.0,9.318060459749784
+6.0,27.318060435188297
+7.0,37.31806043518829
+7.1119896687488815,38.54994674510778
+7.509735631512654,42.52740637076319
+8.0,46.93978572868348
+10.0,80.93978572868347
+11.0,107.93978572274987
+11.988617284502984,135.62106941859045
+12.0,135.8153522922529
+14.0,165.8153522922529
+15.0,188.8153522922529
+15.787551963867735,207.7165996762147
+16.0,212.60290427069114
+16.642697928194213,232.52654000372368
+18.0,270.5309980511389
+19.0,299.5309980511389
+19.07855391435743,302.51604679325607
+19.19509410779188,306.3618729504818
+19.90184719471735,327.56446594859113
+21.0,359.41089712870854
+23.0,439.41089712870854
+24.018403003645872,483.2022259479646
+25.016391040462704,525.1177233777935
+26.0,565.4456911433846
+27.0,607.4456911433846
+28.0,654.4456911433846
+28.423720529144678,678.5977614848742
+29.0,709.716852741951
+29.686123376704018,752.942625189695
+29.861546284216708,763.8188451923075
+30.0,770.8799851430643
+30.028159503621414,772.2967842669163
+30.113621655626826,775.5443465773861
+30.47565328316668,787.491389599764
+31.0,803.2217913509628
+33.0,885.2217913509628
+34.0,931.2217913509628
+37.0,1072.2217913586592
+37.39627669247274,1092.0356260457727
+38.0,1120.4106214419003
+38.11373160245853,1125.8697384992402
+41.0,1261.5243530531404
+41.6289398334058,1291.7134644867092
+42.0,1309.1532928696095
+43.0,1364.1532928696095
+44.0,1422.1532928696095
+44.33992338250847,1443.568465899112
+46.0,1546.4932162465318
+47.0,1615.4932162465318
+48.00138978954256,1696.6057887369643
+48.229823414308235,1713.053009751112
+48.38262776508915,1722.985292439191
+49.24054626160872,1774.4604026676586
+49.32724131028212,1779.4020198443036
+50.0,1817.076507046417
+52.0,1949.076507046417
+53.0,2020.076507046417
+54.0,2092.076507046417
+56.0,2242.076507046417
+57.0,2325.076507046417
+58.0,2424.076507046417
+58.41660914705346,2466.5706388838225
+59.406769807637716,2564.59654493224
+60.0,2621.5466438553544
+61.0,2720.5466438553544
+62.013177377887644,2825.9170912339987
+62.555142538512655,2879.571641607
+63.0,2922.277958354205
+63.053651822154684,2928.0187020848994
+64.0,3028.3316101649493
+66.0,3266.3316101649493
+67.33561673385987,3445.3042513457726
+68.0,3529.6809272380633
+68.10740209496475,3544.9320243145303
+69.0,3658.291958626431
+69.56628249687408,3740.4029191855802
+69.9404358797583,3789.791167246191
+70.0,3797.355810350546
+72.0,4061.355810350546
+72.35840723444448,4110.457600750077
+73.67590800599318,4284.367702472354
+73.73111105743116,4291.488896104126
+74.0,4325.906681549758
+75.0,4456.906681549758
+78.0,4888.906681549758
+78.98944178959522,5055.132902038191
+79.0,5056.853890488418
+79.19907913727612,5092.289977046127
+79.20488662111393,5093.294671657418
+79.4424408715641,5133.6788924018365
+79.78276254777543,5190.5126127809
+80.0,5226.574031168531
+82.0,5564.574031168531
+83.0,5755.574031168531
+83.01837248092505,5759.560858753482
+83.08425717241205,5772.342488879885
+83.53883371826191,5853.71169165795
+83.84853850462943,5902.645046166368
+84.36673008734802,5977.782825448673
+86.0,6183.5748357254815
+87.06606667804223,6323.229569559304
+87.81388256404595,6420.445635940468
+88.1843366809287,6467.493306793481
+89.0,6570.266886759999
+90.0,6710.266886759999
+91.0,6851.266886759999
+92.0,7011.266886759999
+92.20889685771176,7050.539494570822
+92.34031087836858,7073.536946728545
+93.0,7175.129073919127
+94.0,7350.129073919127
+95.0,7526.129073919127
+95.01161425865324,7528.544840843013
+96.0,7733.140688186417
+97.0,7943.140688186417
+98.0,8178.140688186417
+99.16593754611323,8483.61632603061
+99.74496448186845,8634.742357473013
+99.80810799896763,8651.03338353
+100.0,8700.349627197531
+101.0,8968.349627197531
+103.20311791492169,9560.988347046177
+103.21645346764191,9564.42891848124
+103.65011053296297,9672.409525214964
+103.73676728965296,9693.380461848239
+103.91746531457308,9736.205895955176
+104.0,9755.51901151219
+104.18652656028948,9799.725804609128
+105.0,9991.705538064964
+106.0,10256.705538061673
+107.0,10553.705538061673
+108.72163703028698,11073.639920170965
+108.83171714226327,11105.673231836965
+108.87355874608649,11117.47256497
+109.89560692177264,11374.006657092837
+110.0,11397.181921225128
+110.08320350226174,11416.984355265
+110.5384639933315,11521.239007640546
+110.93679209500162,11609.667848262709
+113.0,12057.383961260837
+113.15951249430685,12092.157683618256
+113.6598241402861,12197.723444206382
+114.0,12269.160372828383
+114.39555124452883,12352.621685332382
+114.55551730830281,12385.574695345127
+115.0,12475.804680984673
+116.0,12681.804680984673
+117.0,12890.804680984673
+117.15999333966589,12924.403282839708
+118.0,13099.964674322
+118.01730623264602,13104.100865244709
+119.0,13337.98198056071
+120.000002,13580.982466560708
+
+					</series>
+					<series title="" type="l" color="0xff4747" encoding="csv">0.0,0.0
+1.0,0.0
+2.0,2.0
+3.0016864575440696,7.008432177704922
+4.0,11.001686438580288
+5.0,20.00168643858029
+6.0,31.00168643858029
+6.339227196612947,35.75086687883416
+6.369913232198691,36.02704109646962
+6.3922498619954125,36.16106097957188
+7.0,39.19981175413152
+7.589818908692686,44.50818174474159
+8.0,47.78963064299942
+9.0,60.78963064299942
+10.0,80.78963064299943
+12.0,122.78963063554622
+12.988673596986004,147.5064704369596
+13.0,147.7556514124155
+13.067043691009042,150.16922409565862
+13.56450226122671,163.6006056824297
+13.923586273571878,170.7822859428756
+14.0,172.23414669990365
+15.0,192.23414669990365
+16.202853057305145,217.49406063171102
+17.0,233.4369997414796
+19.0,279.4369997414796
+20.0,307.4369997414796
+20.392506990643373,321.17474419541867
+20.582253236337063,326.8671317369763
+20.587644917319725,327.0127069243893
+21.0,337.7339392871935
+21.881242808575884,364.17122351486546
+23.0,396.61518207988195
+24.620040349541846,458.1767152536546
+25.0,470.7153838195873
+25.459883762251206,486.351431630795
+25.719980160057663,494.41442010377426
+26.0,502.8150152652141
+26.00075598954251,502.84676686197315
+27.0,543.8157712456255
+29.070783471972966,630.7886773407095
+32.0,750.8865547314092
+33.0,804.8865547314092
+33.44740357513648,836.2048046938743
+34.0,874.3339583000549
+36.39800000644802,1049.3879590538368
+36.537317221419,1059.1401633089495
+37.33187919344707,1102.8410720019351
+37.35359660362458,1103.9703775416451
+37.37609072598816,1105.117577908432
+37.574783241798876,1115.0522035005317
+37.674877628895025,1118.755695517367
+38.268341914628245,1134.1857673558218
+38.37831150190973,1136.055250103496
+38.666205933011625,1138.9341944476594
+40.37553292015721,1147.4808294228212
+41.39150782046695,1149.5127792224318
+43.0,1151.1212713960776
+43.41102305075227,1153.1763866348354
+45.0,1159.5322944410634
+46.0,1164.5322944410634
+46.407153121914185,1167.3823662358354
+49.0,1182.9394475566094
+49.13705409106194,1183.8988261895452
+50.0,1189.0765016537855
+50.20324021956669,1191.5153841774961
+51.0,1200.2797418640764
+53.0,1236.2797418640764
+53.533695947168184,1246.4199646599488
+54.0,1254.8134377939002
+55.0,1273.8134377939002
+56.0,1295.8134377939002
+56.40265835564671,1305.0745796628996
+56.763945090260485,1310.855167756482
+57.81774755057851,1326.6622044644953
+57.97184878353635,1328.2032168111268
+58.0,1328.4002753512402
+60.32692117652985,1351.6694870594313
+60.82281683677108,1355.1407567601261
+61.0,1356.2038557033043
+62.0,1367.2038557033043
+63.0,1381.2038557033043
+64.0,1396.2038557033043
+64.0135066521498,1396.5415219250776
+65.29997966910781,1424.8439281323679
+67.0,1460.544355308531
+69.0,1504.544355308531
+69.36324461775722,1513.6254706839352
+69.55878961676726,1517.9274607560762
+69.98824395953247,1526.9460016908367
+70.0,1527.110586408645
+70.16522724151632,1529.5889950525318
+70.81501817984366,1538.6860681737091
+71.0,1540.3509045575802
+71.4384159278138,1546.4887274737084
+71.89916918730039,1550.6355067837085
+72.0,1551.2404917150764
+72.33502102451948,1554.2556809388225
+73.0,1559.5755127298225
+74.0,1568.5755127298225
+75.0,1578.5755127298225
+75.0117537429846,1578.7048039369993
+76.0,1586.610773969546
+76.38504077676438,1590.846222473772
+77.0,1596.9958147420634
+78.0,1614.9958147420634
+79.0,1637.9958147420634
+79.3511863081057,1647.8290313617078
+79.52464644328298,1651.818614485112
+79.60496980419342,1653.4250816577085
+79.68990743544937,1655.038896470531
+79.95810677312707,1658.793687285417
+80.0,1659.3382993013686
+80.4560141534706,1665.7224975834677
+80.65766831600729,1668.3440013989352
+80.66419737260807,1668.4092919748218
+82.0,1680.431515733191
+82.2925908179301,1685.4055597029487
+83.0,1696.7241065578503
+84.0,1721.7241065578503
+85.0,1747.7241065578503
+86.0,1785.7241065578503
+86.08836039141055,1789.4352429215317
+86.60423325006491,1805.4273011269352
+87.0,1817.3003040782403
+87.04532925851898,1819.1588035889501
+87.3417763201164,1828.05221565595
+89.0,1862.874912823241
+90.68683814499146,1903.3590283668996
+91.0,1909.9354272709986
+91.79876954695771,1930.7034354207085
+92.0,1934.929274985
+92.02707030699025,1935.741384247077
+92.35600801827236,1944.6227023543684
+92.40907105733305,1946.0023412469488
+93.0,1960.7755649819353
+95.0,2032.7755649819353
+95.01618202886549,2033.5846663692396
+98.0,2179.791747009787
+98.17574635645362,2188.5790644709637
+98.66832125700833,2206.804335961431
+99.07535085542472,2217.3871056775947
+99.53749528078127,2225.243560693467
+99.89970476352161,2228.8656555430775
+100.0,2229.367131762141
+101.0,2235.367131762141
+102.12839474745907,2247.7794739817577
+103.0,2256.495526504241
+103.96271254466744,2267.085364430191
+105.0,2277.458239044964
+106.68167514133535,2307.7283917342893
+106.93418654649382,2310.506017095368
+107.0,2310.9008978196093
+108.02494078230032,2322.1752465060777
+108.37056568175122,2324.2489959076734
+109.0,2326.1372988435446
+109.3108884677063,2327.3808527073543
+109.51944676819896,2328.006527638205
+113.0,2334.967634089254
+113.64691475443037,2336.9083783542897
+114.0,2337.6145488369502
+115.0,2340.6145488369502
+116.0,2346.6145488369502
+116.15273495033124,2347.6836934966095
+116.39642070900028,2348.658436538241
+118.0,2353.46917440524
+119.0,2359.46917440524
+119.32411678602776,2363.35857575553
+120.000002,2370.793313185176
+
+					</series>
+					<series title="" type="l" color="0xff5050" encoding="csv">0.0,0.0
+1.0,0.0
+3.0,2.0
+3.2356313898657296,3.178156918331075
+3.3769932921310084,3.4608806788817525
+4.0,4.0838873947610805
+6.0,12.083887387526428
+6.187182401373851,13.019799240854985
+9.0,24.27106975518567
+11.0,34.27106975518567
+11.478391274896731,37.14141744434535
+13.0,44.749461035680106
+13.611768648646493,49.03184152792823
+14.0,51.36122967071856
+15.35009396547415,60.81188738364878
+16.0,64.7113236361927
+17.0,73.7113236361927
+18.0,88.7113236361927
+19.0,108.7113236287395
+19.22950313899483,115.13741141761034
+19.68372634927336,125.58454531265075
+19.697460914116558,125.80429830233939
+20.170308961424958,131.9513228179447
+21.723125438542688,150.58512069956674
+21.998740946698145,152.51442926428612
+23.0,156.5194654704392
+24.0,161.5194654704392
+25.0,169.5194654704392
+25.040282522751472,170.00285569283042
+26.0,180.55974798883454
+27.0,197.55974798883454
+28.857659722178266,240.2859214752561
+29.25759218456234,248.28457092003254
+29.823467502769386,257.9044512638289
+29.846482154283866,258.2726856385731
+30.0,260.57545336023304
+32.0,298.57545336023304
+32.84400539783488,315.45556117867693
+33.14526053154143,320.5768985255541
+33.657085453873904,328.76609715800316
+33.9125311188242,331.5759996220938
+33.99663697160471,332.24884637244776
+34.09728303301409,332.7520767114399
+34.23569948977214,333.30574251340914
+36.0,338.59864406336874
+37.0,344.59864406336874
+37.473044903399966,350.27518277611654
+39.0,367.07168895088125
+40.0,379.07168895088125
+40.2983613586956,384.44219331698514
+41.0,394.9667730156015
+41.14364358780854,398.8451497376706
+41.919787615393375,414.36803021996525
+42.0,415.89206570301354
+42.058382596229784,417.81869132205173
+42.24466537390728,422.662043523203
+42.66305437196775,431.44821251207543
+42.820572835930314,434.2835446437704
+43.0,437.3338066500761
+45.0,473.3338066500761
+46.11856216221338,503.5349850497853
+46.24561590754193,505.82195246528477
+46.77814604031161,511.67978379184876
+46.81591813627366,511.9064164111743
+47.0,512.4586620168544
+48.0,519.4586620168544
+49.25908393781763,532.0495013067641
+49.52283875977959,533.8957850644629
+50.0,536.7587525623767
+50.01747222714044,536.8810580721357
+51.0,542.776224775909
+53.0,562.776224775909
+53.02327458678788,563.1253435252087
+55.0,590.799499362298
+57.0,620.799499362298
+58.0,638.799499362298
+59.0,657.799499362298
+60.0,684.799499362298
+60.36599308928153,697.2432640325835
+61.0,716.8974785940167
+61.800750298376634,745.7244894457032
+61.856025321798036,747.4380149345105
+62.0,751.4693060575247
+63.0,788.4693060575247
+65.0,882.4693060575247
+65.30491616159313,900.1544434680808
+65.81012128563033,927.9407255204976
+66.0,938.1941758272441
+67.0,1005.1941758313685
+68.0,1075.1941758313685
+70.0,1217.1941758313685
+71.59432274557771,1335.1740591186729
+72.0,1363.977144079658
+72.61014800703096,1409.1280963293036
+72.99957953248187,1436.7777348406087
+73.0,1436.8071676159002
+74.0,1509.8071676159002
+75.01467030409869,1604.1715050670778
+75.28338559178289,1625.131298345787
+75.52825233776113,1643.4963034205305
+75.58112427963687,1647.4088271902403
+76.0,1672.9602466734668
+76.26368702840755,1689.3088422041262
+76.34579708773302,1693.4964549325946
+78.0,1766.2813834871276
+79.0,1811.2813834871276
+80.0,1863.2813834871276
+80.47103154139562,1891.0722445917093
+81.0,1918.578604301772
+81.2784862907862,1933.338377302403
+81.95485383254736,1965.8040192693672
+82.0,1967.8355971897079
+82.0012728466035,1967.8966934904954
+83.0,2014.8368700304954
+84.0,2081.8368700304954
+85.0,2164.8368700304954
+85.69053306104429,2232.5091097497084
+85.75325466065928,2238.0913320599993
+85.8321911125513,2245.0377408615454
+86.0519535485249,2262.838496878254
+87.0,2334.890027764673
+87.23606973377473,2356.8445125248995
+90.0,2605.5982369492544
+90.0380173095283,2609.209881595112
+91.16946809874914,2711.0404512204173
+91.58060964755938,2746.809766732886
+92.0,2782.8773374074176
+94.0,2960.8773374074176
+94.60907754120896,3015.6943155966446
+95.0,3049.704570014723
+95.14965923483003,3063.922197548077
+96.0,3142.1535477239995
+96.00838824478497,3142.9504300459002
+96.68298196780859,3205.013052334595
+97.0,3233.86169439024
+98.0,3344.86169439024
+99.0,3476.86169439024
+100.0,3631.86169439024
+101.0,3787.86169439024
+102.76586214436308,4075.6972237091404
+103.0,4113.6275565298365
+103.75898082707545,4239.618373881709
+106.0,4609.386537351
+106.75277606268078,4734.347364549255
+107.0,4775.139313424127
+108.0,4949.139313424127
+109.0,5124.139313424127
+110.0,5315.139313424127
+110.43281759015404,5399.105926091709
+111.0,5508.572131015014
+112.0,5702.572131015014
+112.13982878589165,5733.194634488176
+112.3359426653179,5775.947458586076
+114.0,6130.39167306995
+115.35466642595193,6420.290286504708
+115.41438018529398,6432.88989203761
+116.0,6555.870052517112
+118.0,7035.870052517112
+119.81608463104992,7473.546449746254
+120.000002,7512.904765688785
+
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+	</queries>
+</nta>
