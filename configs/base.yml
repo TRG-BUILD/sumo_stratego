@@ -1,0 +1,16 @@
+name: four_phase
+
+results_path: "output/four_phase"
+
+uppaal:
+  modelfile: "stratego/template.xml"
+  debug: "stratego/debug"
+  query: "stratego/query.q"
+  verifyta: "verifyta"
+  verifyta_args: model_config.yml
+
+sumo:
+  job: cross5VP.sumocfg
+  feature_extraction:
+
+logging:
