@@ -1,7 +1,7 @@
 Welcome to SUMO-Stratego
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/mihsamusev/strategoutil)
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/mihsamusev/strategoutil)]
 <!---when tests are ready
 [![badge](https://github.com/mihsamusev/strategoutil/workflows/build/badge.svg)](https://github.com/mihsamusev/strategoutil/actions)
 --->
