@@ -3,8 +3,11 @@ import os
 from datetime import datetime
 
 def get_logger(directory, run_name):
-    """Logger for results
     """
+    Logger for results
+    """
+    os.makedirs(directory, exist_ok=True)
+
     name_id = datetime.now().strftime('%Y%m%d%H%M%S')
     run_id = run_name + "_" + name_id + ".log"
     path = os.path.join(directory, run_id)

@@ -4,7 +4,9 @@ import os
 
 RUN_NAME = "four_phase_vf7"
 RESULT_PATH = "output/four_phase"
-DEBUG_NAME = os.path.join("debug/four_phase", RUN_NAME) 
+DEBUG_PATH = "debug/four_phase"
+os.makedirs(DEBUG_PATH, exist_ok=True)
+DEBUG_NAME = os.path.join(DEBUG_PATH, RUN_NAME)
 MODELFILE = "stratego/four_phase_template.xml"
 QUERY = "stratego/four_phase_query.q"
 VERIFYTA_PATH = "verifyta"
