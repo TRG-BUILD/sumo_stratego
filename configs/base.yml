@@ -25,45 +25,6 @@ sumo:
       1: 1
       2: 2
       3: 3
-
-  extract:
-    - feature: queue
-      from: "NC_4"
-      to: ["A", 0]
-    - feature: queue
-      from: "NC_3"
-      to: ["A", 1]
-    - feature: queue
-      from: "NC_2"
-      to: ["A", 2]
-    - feature: queue
-      from: "SC_4"
-      to: ["A", 0]
-    - feature: queue
-      from: "SC_3"
-      to: ["A", 1]
-    - feature: queue
-      from: "SC_2"
-      to: ["A", 2]
-    - feature: queue
-      from: "WC_4"
-      to: ["B", 0]
-    - feature: queue
-      from: "WC_3"
-      to: ["B", 1]
-    - feature: queue
-      from: "WC_2"
-      to: ["B", 2]
-    - feature: queue
-      from: "EC_4"
-      to: ["B", 0]
-    - feature: queue
-      from: "EC_3"
-      to: ["B", 1]
-    - feature: queue
-      from: "EC_2"
-      to: ["B", 2]
-
   extract:
     - feature: "queue"
       - NC_4: ["A", 0],
