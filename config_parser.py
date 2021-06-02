@@ -1,9 +1,28 @@
 import argparse
 import pathlib
-
+import os
 import confuse
+from confuse.exceptions import NotFoundError
+
+class FilenameValidate(confuse.Filename):
+    """
+    Extend confuse.Filename to check existence of files and folders
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def value(self, view, template=None):
+        path = super().value(view, template)
+        if os.path.exists(path):
+            return path
+        else:
+            raise NotFoundError(f"No such file or directory: {path} ")
+
 
 def get_valid_config():
+    """
+    Get a config dict for CLI and valdate all parameters
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument("-c", "--config", type=str, required=True,
         help="yaml configuration file")
@@ -14,8 +33,8 @@ def get_valid_config():
 
     # build templates
     sumo_template = {
-        'dir': confuse.Path(cwd=pathlib.Path(__file__).parent.absolute()),
-        'model': confuse.Filename(relative_to="dir"),
+        'dir': FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute()),
+        'model': FilenameValidate(relative_to="dir"),
         'nogui': False,
         'tls': confuse.MappingTemplate({
             'id': str,
@@ -33,6 +52,8 @@ def get_valid_config():
     }
 
     valid_config = config.get(template)
+
+    #check files exist
     return valid_config
 
 if __name__ == "__main__":
