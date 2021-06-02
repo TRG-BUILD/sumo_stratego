@@ -1,8 +1,10 @@
 import argparse
 import pathlib
 import os
+import shutil
 import confuse
 from confuse.exceptions import NotFoundError
+from confuse.templates import Filename
 
 class FilenameValidate(confuse.Filename):
     """
@@ -16,8 +18,19 @@ class FilenameValidate(confuse.Filename):
         if os.path.exists(path):
             return path
         else:
-            raise NotFoundError(f"No such file or directory: {path} ")
+            self.fail(f"No such file or directory: {path}", view, True)
 
+class ExecutableValidate(confuse.Template):
+    """
+    Check existence of executables using "which" command
+    """
+    def value(self, view, template=None):
+        path = view.get()
+        abs_path = shutil.which(path)
+        if abs_path is not None:
+            return path
+        else:
+            self.fail(f"No such executable: {path}", view, True)
 
 def get_valid_config():
     """
@@ -31,7 +44,20 @@ def get_valid_config():
     source = confuse.YamlSource(args.config)
     config = confuse.RootView([source])
 
-    # build templates
+    uppaal_template = {
+        'dir': FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute()),
+        'model': FilenameValidate(relative_to="dir"),
+        'query': FilenameValidate(relative_to="dir"),
+        'verifyta': ExecutableValidate(),
+        'debug': False,
+        'variables': confuse.MappingValues(
+            confuse.OneOf([
+                confuse.Number(),
+                confuse.TypeTemplate(list)
+                ])
+            )
+    }
+
     sumo_template = {
         'dir': FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute()),
         'model': FilenameValidate(relative_to="dir"),
@@ -46,9 +72,24 @@ def get_valid_config():
             })
     }
 
+    mpc_template = {
+        'step': 5,
+        'warmup': 1
+    }
+    
+    logging_template = confuse.Optional(
+            confuse.Sequence({
+               'metric': confuse.Choice(['objective', 'state', 'signals']),
+               'dir': FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute())
+            })
+        )
+
     template = {
         'name': str,
-        'sumo': sumo_template
+        'uppaal': uppaal_template,
+        'sumo': sumo_template,
+        'mpc': mpc_template,
+        'logging': logging_template
     }
 
     valid_config = config.get(template)

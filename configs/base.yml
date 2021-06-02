@@ -1,8 +1,8 @@
 name: four_phase
 uppaal:
   dir: stratego
-  model: "template.xml"
-  query: "query.q"
+  model: "four_phase_template.xml"
+  query: "four_phase_query.q"
   verifyta: "verifyta"
   verifyta_args: model_config.yml
   debug: True
@@ -48,5 +48,6 @@ mpc:
   warmup: 1
 
 logging:
-  dir: "output" 
-  metrics: [objective, state, signals]
+  - metric: state
+    dir: "output" 
+  

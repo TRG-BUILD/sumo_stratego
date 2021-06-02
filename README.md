@@ -26,11 +26,15 @@ SUMO-Stratego shares ideas of MPC control using UPPAAL Stratego with the followi
 git clone https://github.com/TRG-BUILD/sumo_stratego.git
 cd sumo_stratego
 pip install -r requirements.txt
+
+# install config parser as their pip is broken
+pip install git+https://github.com/beetbox/confuse.git
+
 python run.py -c tutorial.yaml
 ```
 
 ## TODO
-- extend validation for config files, test
-- TDD feature extraction pipelines definition
+- add info on what stratego interface is used 
+- TDD feature extraction pipeline definitions
 - running batches
 - extend loggers to couple with matplotlib and writting states to DB

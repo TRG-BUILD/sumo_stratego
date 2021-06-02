@@ -20,49 +20,59 @@ def decide_next_phase(durations, phase_seq, MIN_TIME=4):
         next_duration = durations[1]
     return next_duration, next_phase
 
-def run():
+def run(cfg):
+    '''
     logger = get_logger(
         directory=config.RESULT_PATH, 
         run_name=config.RUN_NAME)
-
+    '''
     # Initialize stratego model
     ctrl = Controller(
-        config.MODELFILE,
-        model_cfg_dict=config.CTRL_STATE)
+        cfg.uppaal.model,
+        model_cfg_dict=cfg.uppaal.variables)
 
     traci.trafficlight.setPhase(
-        config.TLS_ID,
-        config.CTRL_TO_SIM_PHASE.get(0)) # start NW
+        cfg.sumo.tls.id,
+        0) # start NW
 
     cost = 0
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
-        phase = traci.trafficlight.getPhase(config.TLS_ID)
+        phase = traci.trafficlight.getPhase(cfg.sumo.tls.id)
 
-        # read and preprocess state
-        veh_counts = fe.get_vehicle_count(config.OBSERVED_LANES)
-        state = fe.build_state(config, veh_counts, 0, phase)
+        # read and preprocess state, hacky for now
+        veh_counts = fe.get_vehicle_count(
+            list(cfg.sumo.extract[0].lanes.keys()))
 
-        if step >= config.WARMUP and step % config.KAPPA == 0:
+        state = fe.build_state(
+            cfg.sumo.extract[0].lanes,
+            cfg.sumo.tls.phase_map, 
+            veh_counts,
+            0,
+            phase)
+
+        if step >= cfg.mpc.warmup and step % cfg.mpc.step == 0:
             # insert and calculate
             ctrl.init_simfile()
             ctrl.update_state(state)
             ctrl.insert_state()
-            ctrl.debug_copy(config.DEBUG_NAME + f"_{step}.xml")
+            #ctrl.debug_copy(config.DEBUG_NAME + f"_{step}.xml")
 
-            durations, phase_seq  = ctrl.run(config.QUERY)
+            durations, phase_seq  = ctrl.run(
+                cfg.uppaal.query)
 
-            phase_seq = [config.CTRL_TO_SIM_PHASE.get(p) for p in phase_seq]
+            #phase_seq = [config.CTRL_TO_SIM_PHASE.get(p) for p in phase_seq]
+            
             duration, next_phase = decide_next_phase(durations, phase_seq)
             print(
                 step, " -> ", f"STATE -> {state} ",f"CONTROLS -> {next_phase} for {duration} s")
 
-            traci.trafficlight.setPhase(config.TLS_ID, next_phase)
+            traci.trafficlight.setPhase(cfg.sumo.tls.id, next_phase)
 
         # objective
         cost += fe.get_state_objective(state)
-        logger.info('%d,%d', step, cost)
+        #logger.info('%d,%d', step, cost)
         step += 1
     
     traci.close()
@@ -78,4 +88,4 @@ if __name__ == "__main__":
     sumo_bin = checkBinary(sumo_bin_name)
     traci.start([sumo_bin, "-c", cfg.sumo.model])
 
-    #run(cfg)
+    run(cfg)
