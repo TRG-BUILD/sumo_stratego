@@ -15,18 +15,22 @@ The purpose of the project is to provide infrastructure that lets use [UPPAAL St
 </p>
 
 ## Associated projects
+SUMO-Stratego shares ideas of MPC control using UPPAAL Stratego with the following projects:
 
 - [`strategoutil`](https://github.com/mihsamusev/strategoutil) - Python library for Model Predictive Control using UPPAAL Stratego
 - [`stratego_mpc_example`](https://github.com/mihsamusev/stratego_mpc_example) - example zoo for `strategoutil`
 
-## Getting started
 
+## Getting started
+```
+git clone https://github.com/TRG-BUILD/sumo_stratego.git
+cd sumo_stratego
+pip install -r requirements.txt
+python run.py -c tutorial.yaml
+```
 
 ## TODO
-- tests
-- good choice of config
-- feature extraction pipelines definition
+- extend validation for config files, test
+- TDD feature extraction pipelines definition
 - running batches
 - extend loggers to couple with matplotlib and writting states to DB
-
-## Contribute

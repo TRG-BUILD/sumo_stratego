@@ -1,23 +1,25 @@
 name: four_phase
 uppaal:
-  root: stratego/
+  dir: stratego
   model: "template.xml"
   query: "query.q"
   verifyta: "verifyta"
   verifyta_args: model_config.yml
   debug: True
   constants:
-    - MAX_TIME: 4
-    - HORIZON: 60
+    MAX_TIME: 4
+    HORIZON: 60
   variables:
-    - A: [0, 0, 0]
-    - B: [0, 0, 0]
-    - x: 0.0
-    - is_active: [0, 0, 0, 1]
+    A: [0, 0, 0]
+    B: [0, 0, 0]
+    x: 0.0
+    is_active: [0, 0, 0, 1]
 
 # so far only supports a single traffic light
 sumo:
+  dir: sumo
   model: "cross5VP.sumocfg"
+  nogui: False
   tls: 
     id: "C"
     phase_map:
@@ -27,24 +29,24 @@ sumo:
       3: 3
   extract:
     - feature: "queue"
-      - NC_4: ["A", 0],
-      - NC_3: ["A", 1],
-      - NC_2: ["A", 2],
-      - SC_4: ["A", 0],
-      - SC_3: ["A", 1],
-      - SC_2: ["A", 2],
-      - WC_4: ["B", 0],
-      - WC_3: ["B", 1],
-      - WC_2: ["B", 2],
-      - EC_4: ["B", 0],
-      - EC_3: ["B", 1],
-      - EC_2: ["B", 2]
-
+      lanes:
+        NC_4: ["A", 0]
+        NC_3: ["A", 1]
+        NC_2: ["A", 2]
+        SC_4: ["A", 0]
+        SC_3: ["A", 1]
+        SC_2: ["A", 2]
+        WC_4: ["B", 0]
+        WC_3: ["B", 1]
+        WC_2: ["B", 2]
+        EC_4: ["B", 0]
+        EC_3: ["B", 1]
+        EC_2: ["B", 2]
 
 mpc:
   step: 5
   warmup: 1
 
 logging:
-  root: "output" 
-  data: [objective, state, signals]
+  dir: "output" 
+  metrics: [objective, state, signals]

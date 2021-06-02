@@ -1,12 +1,11 @@
 
-import optparse
 from sumolib import checkBinary
 import traci
 
-import configs.cfg_cross5VP as config
 from stratego.four_phase_interface import Controller
 import sumo.feature_extraction as fe
 from resultlogger import get_logger
+import config_parser as cp
 
 def decide_next_phase(durations, phase_seq, MIN_TIME=4):
     """
@@ -65,35 +64,18 @@ def run():
         cost += fe.get_state_objective(state)
         logger.info('%d,%d', step, cost)
         step += 1
+    
+    traci.close()
 
 
-def get_options():
-    optParser = optparse.OptionParser()
-    optParser.add_option("--nogui", action="store_true",
-                         default=False, 
-                         help="run the commandline version of sumo")
-    options, args = optParser.parse_args()
-    return options
-
-def get_options():
-    optParser = optparse.OptionParser()
-    optParser.add_option("--nogui", action="store_true",
-                         default=False, help="run the commandline version of sumo")
-    optParser.add_option("-v", "--verifyta", type=str, 
-                        default="verifyta")
-    optParser.add_option("-q", "--query", type=str, 
-                        default="models/stratego/basic_nonsync_query.q")
-    optParser.add_option("-n", "--name", 
-                        default="basic_nonsync", type=str)
-    options, args = optParser.parse_args()
-    return options
 
 if __name__ == "__main__":
+    cfg = cp.get_valid_config()
+    sumo_bin_name = 'sumo-gui' 
+    if cfg.sumo.nogui:
+        sumo_bin_name = 'sumo'
 
-    options = get_options()
-    if options.nogui:
-        sumoBinary = checkBinary('sumo')
-    else:
-        sumoBinary = checkBinary('sumo-gui')
-    traci.start([sumoBinary, "-c", "sumo/cross5VP.sumocfg"])
-    run()
+    sumo_bin = checkBinary(sumo_bin_name)
+    traci.start([sumo_bin, "-c", cfg.sumo.model])
+
+    #run(cfg)
