@@ -2,10 +2,17 @@
 from sumolib import checkBinary
 import traci
 
-from stratego.four_phase_interface import Controller
-import sumo.feature_extraction as fe
+import importlib.util
+import feature_extraction as fe
 from resultlogger import get_logger
 import config_parser as cp
+
+def import_uppaal_interface(path):
+    spec = importlib.util.spec_from_file_location(
+        "stratego.interface", cfg.uppaal.interface)
+    interface = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(interface)
+    return interface
 
 def decide_next_phase(durations, phase_seq, MIN_TIME=4):
     """
@@ -26,9 +33,11 @@ def run(cfg):
         directory=config.RESULT_PATH, 
         run_name=config.RUN_NAME)
     '''
+
     # Initialize stratego model
-    ctrl = Controller(
-        cfg.uppaal.model,
+    interface = import_uppaal_interface(cfg.uppaal.interface)
+    ctrl = interface.Controller(
+        templatefile=cfg.uppaal.model,
         model_cfg_dict=cfg.uppaal.variables)
 
     traci.trafficlight.setPhase(
@@ -60,7 +69,8 @@ def run(cfg):
             #ctrl.debug_copy(config.DEBUG_NAME + f"_{step}.xml")
 
             durations, phase_seq  = ctrl.run(
-                cfg.uppaal.query)
+                queryfile=cfg.uppaal.query,
+                verifyta_path=cfg.uppaal.verifyta)
 
             #phase_seq = [config.CTRL_TO_SIM_PHASE.get(p) for p in phase_seq]
             

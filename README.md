@@ -22,6 +22,7 @@ SUMO-Stratego shares ideas of MPC control using UPPAAL Stratego with the followi
 
 
 ## Getting started
+### Install
 ```
 git clone https://github.com/TRG-BUILD/sumo_stratego.git
 cd sumo_stratego
@@ -32,6 +33,33 @@ pip install git+https://github.com/beetbox/confuse.git
 
 python run.py -c tutorial.yaml
 ```
+
+## Project structure
+```
+run.py
+utils
+- feature_extraction.py
+configs
+- job_1.yml
+- job_2.yml
+jobs
+- job_1
+    - stratego
+        - __init__.py
+        - model_template.xml
+        - interface.py
+        - query.q
+    - sumo
+        - __init__.py
+        - demand
+        - network
+        - simulation.sumocfg
+    - output
+    - debug
+- job_2
+    ...
+```
+
 
 ## TODO
 - add info on what stratego interface is used 

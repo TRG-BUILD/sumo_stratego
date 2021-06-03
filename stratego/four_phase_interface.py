@@ -26,9 +26,12 @@ class Controller(StrategoController):
                 value = self.format_state(value)
                 sutil.insert_to_modelfile(self.simulationfile, tag, value)
 
-    def run(self, query="", learning_args={}):
-        output = super().run(query, learning_args)
+    def run(self, queryfile="", learning_args=None, verifyta_path="verifyta"):
+        output = super().run(queryfile, learning_args, verifyta_path)
         tpls = sutil.get_int_tuples(output)
         result = sutil.get_duration_action(tpls, max_time=1000)
         durations, actions = list(zip(*result)) 
         return durations, actions
+
+if __name__ == "__main__":
+    pass

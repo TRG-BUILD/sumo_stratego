@@ -18,7 +18,7 @@ const int rAdd=0, rRemA=1, rRemB=1;
 
 // communication between phases
 const int N = 4; // number of phases
-bool is_active[N] = {0, 0, 0, 1}; //{1, 0, 0, 0};
+bool is_active[N] = {0, 0, 1, 0}; //{1, 0, 0, 0};
 broadcast chan phaseChan[N];
 
 /*options for the synced transitions,

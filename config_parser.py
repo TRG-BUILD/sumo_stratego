@@ -47,6 +47,7 @@ def get_valid_config():
     uppaal_template = {
         'dir': FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute()),
         'model': FilenameValidate(relative_to="dir"),
+        'interface': FilenameValidate(relative_to="dir"),
         'query': FilenameValidate(relative_to="dir"),
         'verifyta': ExecutableValidate(),
         'debug': False,
