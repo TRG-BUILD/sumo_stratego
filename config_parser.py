@@ -65,7 +65,9 @@ def get_valid_config():
         'nogui': False,
         'tls': confuse.MappingTemplate({
             'id': str,
-            'phase_map': dict
+            'phase_map': dict,
+            'phase_var': str,
+            'duration_var': confuse.Optional(str)
             }),
         'extract': confuse.Sequence({
             'feature': confuse.Choice(["queue", "speed"]),

@@ -15,7 +15,7 @@ uppaal:
     A: [0, 0, 0]
     B: [0, 0, 0]
     x: 0.0
-    is_active: [0, 0, 0, 1]
+    is_active: [0, 0, 0, 0]
 
 sumo:
   dir: sumo
@@ -28,6 +28,8 @@ sumo:
       1: 1
       2: 2
       3: 3
+    phase_var: "is_active"
+
   extract:
     - feature: "queue"
       type: "vehicle"

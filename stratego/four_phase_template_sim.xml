@@ -8,8 +8,8 @@
 
 // state variables
 const int L = 3; // number of lanes with differen maneuvers per road 
-int A[L] = {0, 0, 0}; //{3, 5, 3};
-int B[L] = {0, 0, 0}; //{1, 7, 0};
+int A[L] = {4, 0, 2}; //{3, 5, 3};
+int B[L] = {2, 4, 0}; //{1, 7, 0};
 clock x = 0.0;
 
 // disturbances
@@ -18,7 +18,7 @@ const int rAdd=0, rRemA=1, rRemB=1;
 
 // communication between phases
 const int N = 4; // number of phases
-bool is_active[N] = {0, 0, 1, 0}; //{1, 0, 0, 0};
+bool is_active[N] = {1, 1, 1, 0}; //{1, 0, 0, 0};
 broadcast chan phaseChan[N];
 
 /*options for the synced transitions,

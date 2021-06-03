@@ -8,8 +8,11 @@ from resultlogger import get_logger
 import config_parser as cp
 
 def import_uppaal_interface(path):
+    """
+    Import UPPAAL strategoutil interface as module from file path
+    """
     spec = importlib.util.spec_from_file_location(
-        "stratego.interface", cfg.uppaal.interface)
+        "stratego.interface", path)
     interface = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(interface)
     return interface
@@ -27,39 +30,28 @@ def decide_next_phase(durations, phase_seq, MIN_TIME=4):
         next_duration = durations[1]
     return next_duration, next_phase
 
-def run(cfg):
+def run(cfg, ctrl):
     '''
     logger = get_logger(
         directory=config.RESULT_PATH, 
         run_name=config.RUN_NAME)
     '''
 
-    # Initialize stratego model
-    interface = import_uppaal_interface(cfg.uppaal.interface)
-    ctrl = interface.Controller(
-        templatefile=cfg.uppaal.model,
-        model_cfg_dict=cfg.uppaal.variables)
+    feature_pipeline = fe.ExtractionPipeline(
+        cfg.sumo.tls,
+        cfg.sumo.extract)
 
     traci.trafficlight.setPhase(
         cfg.sumo.tls.id,
         0) # start NW
 
-    cost = 0
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
         phase = traci.trafficlight.getPhase(cfg.sumo.tls.id)
 
-        # read and preprocess state, hacky for now
-        veh_counts = fe.get_vehicle_count(
-            list(cfg.sumo.extract[0].lanes.keys()))
-
-        state = fe.build_state(
-            cfg.sumo.extract[0].lanes,
-            cfg.sumo.tls.phase_map, 
-            veh_counts,
-            0,
-            phase)
+        # read and preprocess state
+        state = feature_pipeline.apply(cfg.uppaal.variables)
 
         if step >= cfg.mpc.warmup and step % cfg.mpc.step == 0:
             # insert and calculate
@@ -76,26 +68,37 @@ def run(cfg):
             
             duration, next_phase = decide_next_phase(durations, phase_seq)
             print(
-                step, " -> ", f"STATE -> {state} ",f"CONTROLS -> {next_phase} for {duration} s")
+                step, " -> ",
+                f"STATE -> {state} ",
+                f"CONTROLS -> {next_phase} for {duration} s ",
+                f"OBJECTIVE -> {ctrl.get_objective()}")
 
             traci.trafficlight.setPhase(cfg.sumo.tls.id, next_phase)
 
         # objective
-        cost += fe.get_state_objective(state)
+        #ctrl.get_objective()
         #logger.info('%d,%d', step, cost)
         step += 1
     
     traci.close()
 
-
-
-if __name__ == "__main__":
+def main():
     cfg = cp.get_valid_config()
     sumo_bin_name = 'sumo-gui' 
     if cfg.sumo.nogui:
         sumo_bin_name = 'sumo'
 
+    # Initialize UPPAAL model
     sumo_bin = checkBinary(sumo_bin_name)
     traci.start([sumo_bin, "-c", cfg.sumo.model])
 
-    run(cfg)
+    # Initialize stratego model
+    interface = import_uppaal_interface(cfg.uppaal.interface)
+    ctrl = interface.Controller(
+        templatefile=cfg.uppaal.model,
+        model_cfg_dict=cfg.uppaal.variables)
+
+    run(cfg, ctrl)
+
+if __name__ == "__main__":
+    main()
