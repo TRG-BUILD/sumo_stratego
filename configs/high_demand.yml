@@ -1,0 +1,57 @@
+job: 
+  name: 4_way_veh_high_demand
+  dir: example
+
+uppaal:
+  dir: stratego
+  model: "four_phase_template.xml"
+  interface: "four_phase_interface.py"
+  query: "four_phase_query.q"
+  verifyta: "verifyta"
+  debug: False
+  constants:
+    MAX_TIME: 4
+    HORIZON: 60
+  variables:
+    A: [0, 0, 0]
+    B: [0, 0, 0]
+    x: 0.0
+    is_active: [0, 0, 0, 0]
+
+sumo:
+  dir: sumo
+  model: "cross5VP_high.sumocfg"
+  nogui: True
+  tls: 
+    id: "C"
+    phase_map:
+      0: 0 
+      1: 1
+      2: 2
+      3: 3
+    phase_var: "is_active"
+
+  extract:
+    - feature: "queue"
+      type: "vehicle"
+      lanes:
+        NC_4: ["A", 0]
+        NC_3: ["A", 1]
+        NC_2: ["A", 2]
+        SC_4: ["A", 0]
+        SC_3: ["A", 1]
+        SC_2: ["A", 2]
+        WC_4: ["B", 0]
+        WC_3: ["B", 1]
+        WC_2: ["B", 2]
+        EC_4: ["B", 0]
+        EC_3: ["B", 1]
+        EC_2: ["B", 2]
+
+mpc:
+  step: 5
+  warmup: 1
+
+logging:
+  metrics: ["objective", "state"]
+  
