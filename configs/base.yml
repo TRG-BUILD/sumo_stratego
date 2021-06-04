@@ -1,5 +1,5 @@
-job: four_phase
-name: run_1
+job: 
+  name: run_2
 
 uppaal:
   dir: stratego
@@ -20,7 +20,7 @@ uppaal:
 sumo:
   dir: sumo
   model: "cross5VP.sumocfg"
-  nogui: False
+  nogui: True
   tls: 
     id: "C"
     phase_map:
@@ -52,6 +52,6 @@ mpc:
   warmup: 1
 
 logging:
-  - metric: state
-    dir: "output" 
+  metrics: ["objective", "state"]
+  dir: "output" 
   

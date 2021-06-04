@@ -44,8 +44,19 @@ def get_valid_config():
     source = confuse.YamlSource(args.config)
     config = confuse.RootView([source])
 
+    job_template = {
+        "job": {
+            "name": str,
+            "dir": confuse.Optional(
+                FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute()),
+                default=pathlib.Path(__file__).parent.absolute()
+            )            
+        }
+    }
+    job_config = config.get(job_template)
+
     uppaal_template = {
-        'dir': FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute()),
+        'dir': FilenameValidate(cwd=job_config.job.dir),
         'model': FilenameValidate(relative_to="dir"),
         'interface': FilenameValidate(relative_to="dir"),
         'query': FilenameValidate(relative_to="dir"),
@@ -60,7 +71,7 @@ def get_valid_config():
     }
 
     sumo_template = {
-        'dir': FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute()),
+        'dir': FilenameValidate(cwd=job_config.job.dir),
         'model': FilenameValidate(relative_to="dir"),
         'nogui': False,
         'tls': confuse.MappingTemplate({
@@ -81,21 +92,20 @@ def get_valid_config():
     }
     
     logging_template = confuse.Optional(
-            confuse.Sequence({
-               'metric': confuse.Choice(['objective', 'state', 'signals']),
-               'dir': FilenameValidate(cwd=pathlib.Path(__file__).parent.absolute())
+            confuse.MappingTemplate({
+               'metrics': confuse.Sequence(confuse.Choice(['objective', 'state', 'signals'])),
+               'dir': FilenameValidate(cwd=job_config.job.dir)
             })
         )
 
-    template = {
-        'name': str,
+    full_template = {
         'uppaal': uppaal_template,
         'sumo': sumo_template,
         'mpc': mpc_template,
         'logging': logging_template
     }
-
-    valid_config = config.get(template)
+    full_template.update(job_template)
+    valid_config = config.get(full_template)
 
     #check files exist
     return valid_config

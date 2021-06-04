@@ -32,12 +32,7 @@ def decide_next_phase(durations, phase_seq, ctrl_to_sim_phase_map, MIN_TIME=4):
         next_duration = durations[1]
     return next_duration, next_phase
 
-def run(cfg, ctrl):
-    '''
-    logger = get_logger(
-        directory=config.RESULT_PATH, 
-        run_name=config.RUN_NAME)
-    '''
+def run(cfg, ctrl, logger):
     c2s_phase_map = {v: k for k, v in cfg.sumo.tls.phase_map.items()}
     feature_pipeline = fe.ExtractionPipeline(
         cfg.sumo.tls,
@@ -78,22 +73,15 @@ def run(cfg, ctrl):
 
             traci.trafficlight.setPhase(cfg.sumo.tls.id, next_phase)
 
-        # objective
-        #ctrl.get_objective()
-        #logger.info('%d,%d', step, cost)
+        if logger:
+            logger.info('%d,%d', step, ctrl.get_objective())
+
         step += 1
     
     traci.close()
 
 def main():
     cfg = cp.get_valid_config()
-    sumo_bin_name = 'sumo-gui' 
-    if cfg.sumo.nogui:
-        sumo_bin_name = 'sumo'
-
-    # Initialize UPPAAL model
-    sumo_bin = checkBinary(sumo_bin_name)
-    traci.start([sumo_bin, "-c", cfg.sumo.model])
 
     # Initialize stratego model
     interface = import_uppaal_interface(cfg.uppaal.interface)
@@ -101,7 +89,21 @@ def main():
         templatefile=cfg.uppaal.model,
         model_cfg_dict=cfg.uppaal.variables)
 
-    run(cfg, ctrl)
+    # Initialize logger
+    logger = None
+    if cfg.logging:
+        logger = get_logger(
+            directory=cfg.logging.dir, 
+            run_name=cfg.job.name)
+
+    # Initialize SUMO simulator
+    sumo_bin_name = 'sumo-gui' 
+    if cfg.sumo.nogui:
+        sumo_bin_name = 'sumo'
+    sumo_bin = checkBinary(sumo_bin_name)
+    traci.start([sumo_bin, "-c", cfg.sumo.model])
+
+    run(cfg, ctrl, logger)
 
 if __name__ == "__main__":
     main()
