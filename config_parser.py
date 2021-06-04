@@ -93,8 +93,7 @@ def get_valid_config():
     
     logging_template = confuse.Optional(
             confuse.MappingTemplate({
-               'metrics': confuse.Sequence(confuse.Choice(['objective', 'state', 'signals'])),
-               'dir': FilenameValidate(cwd=job_config.job.dir)
+               'metrics': confuse.Sequence(confuse.Choice(['objective', 'state', 'signals']))
             })
         )
 
@@ -107,7 +106,24 @@ def get_valid_config():
     full_template.update(job_template)
     valid_config = config.get(full_template)
 
-    #check files exist
+    # add debug and output folders if they are required
+    if valid_config.uppaal.debug:
+        debug_dir = os.path.join(valid_config.job.dir, "debug")
+        os.makedirs(debug_dir, exist_ok=True)
+        debug_model = os.path.join(
+            debug_dir, 
+            f"{valid_config.job.name}_{os.path.basename(valid_config.uppaal.model)}"
+            )
+        valid_config.uppaal.update({
+            "debug_dir": debug_dir,
+            "debug_model": debug_model
+            })
+
+    if valid_config.logging:
+        output_dir = os.path.join(valid_config.job.dir, "output")
+        os.makedirs(output_dir, exist_ok=True)
+        valid_config.logging.update({"dir": output_dir})
+
     return valid_config
 
 if __name__ == "__main__":

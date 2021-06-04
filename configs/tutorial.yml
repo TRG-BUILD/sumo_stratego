@@ -1,5 +1,6 @@
 job: 
-  name: run_2
+  name: 4_way_veh_bin_3
+  dir: example
 
 uppaal:
   dir: stratego
@@ -20,7 +21,7 @@ uppaal:
 sumo:
   dir: sumo
   model: "cross5VP.sumocfg"
-  nogui: True
+  nogui: False
   tls: 
     id: "C"
     phase_map:
@@ -53,5 +54,4 @@ mpc:
 
 logging:
   metrics: ["objective", "state"]
-  dir: "output" 
   

@@ -56,7 +56,10 @@ def run(cfg, ctrl, logger):
             ctrl.init_simfile()
             ctrl.update_state(state)
             ctrl.insert_state()
-            #ctrl.debug_copy(config.DEBUG_NAME + f"_{step}.xml")
+
+            if cfg.uppaal.debug:
+                ctrl.debug_copy(
+                    cfg.uppaal.debug_model.replace(".xml", f"_{step}.xml"))
 
             durations, phase_seq  = ctrl.run(
                 queryfile=cfg.uppaal.query,
