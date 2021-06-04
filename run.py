@@ -17,12 +17,14 @@ def import_uppaal_interface(path):
     spec.loader.exec_module(interface)
     return interface
 
-def decide_next_phase(durations, phase_seq, MIN_TIME=4):
+def decide_next_phase(durations, phase_seq, ctrl_to_sim_phase_map, MIN_TIME=4):
     """
     If controller stays in the current phase longer than MIN_TIME
     it has decided to extend it, otherwise if it stays
     exactly MIN_TIME it is eager to switch it
     """
+    phase_seq = [ctrl_to_sim_phase_map.get(p) for p in phase_seq]
+    
     next_phase = phase_seq[0]
     next_duration = durations[0]
     if next_duration == MIN_TIME and len(phase_seq) > 1:
@@ -36,10 +38,11 @@ def run(cfg, ctrl):
         directory=config.RESULT_PATH, 
         run_name=config.RUN_NAME)
     '''
-
+    c2s_phase_map = {v: k for k, v in cfg.sumo.tls.phase_map.items()}
     feature_pipeline = fe.ExtractionPipeline(
         cfg.sumo.tls,
-        cfg.sumo.extract)
+        cfg.sumo.extract,
+        cfg.uppaal.variables)
 
     traci.trafficlight.setPhase(
         cfg.sumo.tls.id,
@@ -51,7 +54,7 @@ def run(cfg, ctrl):
         phase = traci.trafficlight.getPhase(cfg.sumo.tls.id)
 
         # read and preprocess state
-        state = feature_pipeline.apply(cfg.uppaal.variables)
+        state = feature_pipeline.extract()
 
         if step >= cfg.mpc.warmup and step % cfg.mpc.step == 0:
             # insert and calculate
@@ -63,10 +66,10 @@ def run(cfg, ctrl):
             durations, phase_seq  = ctrl.run(
                 queryfile=cfg.uppaal.query,
                 verifyta_path=cfg.uppaal.verifyta)
-
-            #phase_seq = [config.CTRL_TO_SIM_PHASE.get(p) for p in phase_seq]
-            
-            duration, next_phase = decide_next_phase(durations, phase_seq)
+       
+            duration, next_phase = decide_next_phase(
+                durations, phase_seq, c2s_phase_map)
+        
             print(
                 step, " -> ",
                 f"STATE -> {state} ",

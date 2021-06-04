@@ -62,17 +62,10 @@ jobs
 
 
 ## TODO
-- add info on what stratego interface is used 
-- TDD feature extraction pipeline definitions
+- add constants, HORIZON, MIN_TIME, MAX_TIME
+- add logging
+- TDD for feature extraction pipeline definitions
 - running batches
 - extend loggers to couple with matplotlib and writting states to DB
 
 
-## FIX BUG!
-```
-20  ->  STATE -> {'A': [0, 0, 2], 'B': [0, 0, 0], 'x': 0.0, 'is_active': [1, 0, 1, 0]}  CONTROLS -> 0 for 5 s  OBJECTIVE -> 5
-25  ->  STATE -> {'A': [2, 0, 2], 'B': [0, 1, 0], 'x': 0.0, 'is_active': [1, 0, 1, 0]}  CONTROLS -> 1 for 6 s  OBJECTIVE -> 14
-30  ->  STATE -> {'A': [3, 0, 2], 'B': [0, 2, 0], 'x': 0.0, 'is_active': [1, 1, 1, 0]}  CONTROLS -> 1 for 1 s  OBJECTIVE -> 31
-35  ->  STATE -> {'A': [3, 0, 2], 'B': [1, 4, 0], 'x': 0.0, 'is_active': [1, 1, 1, 0]}  CONTROLS -> 2 for 2 s  OBJECTIVE -> 61
-40  ->  STATE -> {'A': [4, 0, 2], 'B': [2, 4, 0], 'x': 0.0, 'is_active': [1, 1, 1, 0]}  CONTROLS -> 0 for 5 s  OBJECTIVE -> 101
-```
