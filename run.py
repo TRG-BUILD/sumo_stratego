@@ -44,7 +44,7 @@ def run(cfg, ctrl, logger):
         0) # start NW
 
     step = 0
-    while traci.simulation.getMinExpectedNumber() > 0:
+    while traci.simulation.getMinExpectedNumber() > 0 or step > 2000:
         traci.simulationStep()
         phase = traci.trafficlight.getPhase(cfg.sumo.tls.id)
 
