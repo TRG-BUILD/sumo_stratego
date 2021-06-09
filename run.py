@@ -65,7 +65,7 @@ def run(cfg, ctrl, logger):
         
     time = 0
     phase_time = 0
-    while traci.simulation.getMinExpectedNumber() > 0 or time > 2000:
+    while traci.simulation.getMinExpectedNumber() > 0 or time > cfg.mpc.max_steps:
         traci.simulationStep()
 
         # sim step info
@@ -80,7 +80,7 @@ def run(cfg, ctrl, logger):
         # if its not a yellow phase AND we_are past MIN_TIME AND its Its MPC step time
 
         if (is_main_phase and time >= cfg.mpc.warmup and 
-            phase_time % cfg.mpc.step == 0 and phase_time > 4):
+            phase_time % cfg.mpc.step == 0 and phase_time >= cfg.sumo.tls.min_green):
             # insert and calculate
             ctrl.init_simfile()
             ctrl.update_state(state)
@@ -95,7 +95,7 @@ def run(cfg, ctrl, logger):
                 verifyta_path=cfg.uppaal.verifyta)
        
             duration, next_phase = decide_next_phase(
-                durations, phase_seq, c2s_phase_map)
+                durations, phase_seq, c2s_phase_map, cfg.sumo.tls.min_green)
         
             print(
                 time, " -> ",
@@ -105,7 +105,8 @@ def run(cfg, ctrl, logger):
                 f"OBJECTIVE -> {ctrl.get_objective(state)}")
 
             # switching function
-            next_phase = switch_phase(transitions, phase, next_phase, n_main_phases)
+            if cfg.sumo.tls.transitions:
+                next_phase = switch_phase(transitions, phase, next_phase, n_main_phases)
             if phase != next_phase:
                 phase_time = 0
             traci.trafficlight.setPhase(cfg.sumo.tls.id, next_phase)

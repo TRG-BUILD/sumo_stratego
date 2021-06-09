@@ -74,6 +74,8 @@ def get_valid_config():
         'nogui': False,
         'tls': confuse.MappingTemplate({
             'id': str,
+            'min_green': 4,
+            'transitions': False,
             'phase_map': dict,
             'phase_var': str,
             'duration_var': confuse.Optional(str)
@@ -86,7 +88,8 @@ def get_valid_config():
 
     mpc_template = {
         'step': 5,
-        'warmup': 1
+        'warmup': 1,
+        'max_steps': 10e10
     }
     
     logging_template = confuse.Optional(
