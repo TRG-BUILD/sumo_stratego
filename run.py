@@ -7,6 +7,8 @@ import feature_extraction as fe
 from resultlogger import get_logger
 import config_parser as cp
 
+import strategoutil as sutil
+
 def import_uppaal_interface(path):
     """
     Import UPPAAL strategoutil interface as module from file path
@@ -32,6 +34,21 @@ def decide_next_phase(durations, phase_seq, ctrl_to_sim_phase_map, MIN_TIME=4):
         next_duration = durations[1]
     return next_duration, next_phase
 
+def switch_phase(transitions, this_phase, next_phase, n_main_phases):
+    out = next_phase
+    if this_phase != next_phase:
+        transition_phase = transitions.index((this_phase, next_phase))
+        out = n_main_phases + transition_phase
+    return out
+        
+    
+def get_transitions(tls_cfg, n_main_phases):
+    transitions = []
+    for p in traci.trafficlight.getAllProgramLogics(tls_cfg.id)[-1].phases[n_main_phases:]:
+        i, j = map(int, p.name.strip("( )").split(","))
+        transitions.append((i, j))
+    return transitions
+
 def run(cfg, ctrl, logger):
     c2s_phase_map = {v: k for k, v in cfg.sumo.tls.phase_map.items()}
     feature_pipeline = fe.ExtractionPipeline(
@@ -43,15 +60,27 @@ def run(cfg, ctrl, logger):
         cfg.sumo.tls.id,
         0) # start NW
 
-    step = 0
-    while traci.simulation.getMinExpectedNumber() > 0 or step > 2000:
+    n_main_phases = len(cfg.sumo.tls.phase_map)
+    transitions = get_transitions(cfg.sumo.tls, n_main_phases)
+        
+    time = 0
+    phase_time = 0
+    while traci.simulation.getMinExpectedNumber() > 0 or time > 2000:
         traci.simulationStep()
+
+        # sim step info
+        time = traci.simulation.getTime()
+        
         phase = traci.trafficlight.getPhase(cfg.sumo.tls.id)
+        is_main_phase = phase < n_main_phases
+        if is_main_phase:
+            phase_time += 1
+            state = feature_pipeline.extract()
 
-        # read and preprocess state
-        state = feature_pipeline.extract()
+        # if its not a yellow phase AND we_are past MIN_TIME AND its Its MPC step time
 
-        if step >= cfg.mpc.warmup and step % cfg.mpc.step == 0:
+        if (is_main_phase and time >= cfg.mpc.warmup and 
+            phase_time % cfg.mpc.step == 0 and phase_time > 4):
             # insert and calculate
             ctrl.init_simfile()
             ctrl.update_state(state)
@@ -59,7 +88,7 @@ def run(cfg, ctrl, logger):
 
             if cfg.uppaal.debug:
                 ctrl.debug_copy(
-                    cfg.uppaal.debug_model.replace(".xml", f"_{step}.xml"))
+                    cfg.uppaal.debug_model.replace(".xml", f"_{time}.xml"))
 
             durations, phase_seq  = ctrl.run(
                 queryfile=cfg.uppaal.query,
@@ -69,17 +98,22 @@ def run(cfg, ctrl, logger):
                 durations, phase_seq, c2s_phase_map)
         
             print(
-                step, " -> ",
+                time, " -> ",
+                f"ELAPSED -> {phase_time} ", 
                 f"STATE -> {state} ",
-                f"CONTROLS -> {next_phase} for {duration} s ",
-                f"OBJECTIVE -> {ctrl.get_objective()}")
+                f"CONTROLS -> {phase} to {next_phase} for {duration} s ",
+                f"OBJECTIVE -> {ctrl.get_objective(state)}")
 
+            # switching function
+            next_phase = switch_phase(transitions, phase, next_phase, n_main_phases)
+            if phase != next_phase:
+                phase_time = 0
             traci.trafficlight.setPhase(cfg.sumo.tls.id, next_phase)
 
+        # log
         if logger:
-            logger.info('%d,%d', step, ctrl.get_objective())
+            logger.info('%d,%d', time, ctrl.get_objective(state))
 
-        step += 1
     
     traci.close()
 

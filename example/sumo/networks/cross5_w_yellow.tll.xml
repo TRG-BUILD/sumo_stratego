@@ -1,0 +1,16 @@
+<additional>
+    <tlLogic id="C" type="static" programID="1" offset="0">
+        <phase duration="10" state="gGgGrrrrrrgGgGrrrrrrrGrG" name="0_NS_xFR" />
+        <phase duration="10" state="rrrrGrrrrrrrrrGrrrrrrrrr" name="1_NS_Lxx" />
+        <phase duration="10" state="rrrrrgGgGgrrrrrgGgGgGrGr" name="2_EW_lFR" />
+        <phase duration="10" state="rrrrrrrrrGrrrrrrrrrGrrrr" name="3_EW_Lxx" />
+		<phase duration="3" state="yyyyrrrrrryyyyrrrrrrrrrr" next="1" name="(0, 1)" />
+		<phase duration="3" state="yyyyrrrrrryyyyrrrrrrrrrr" next="2" name="(0, 2)" />
+		<phase duration="3" state="rrrryrrrrrrrrryrrrrrrrrr" next="0" name="(1, 0)" />
+		<phase duration="3" state="rrrryrrrrrrrrryrrrrrrrrr" next="2" name="(1, 2)" />
+		<phase duration="3" state="rrrrryyyyyrrrrryyyyyrrrr" next="0" name="(2, 0)" />
+		<phase duration="3" state="rrrrryyyyyrrrrryyyyyrrrr" next="1" name="(2, 1)" />
+		<phase duration="3" state="rrrrryyyygrrrrryyyygrrrr" next="3" name="(2, 3)" />
+		<phase duration="3" state="rrrrrrrrryrrrrrrrrryrrrr" next="0" name="(3, 0)" />
+    </tlLogic>
+</additional>

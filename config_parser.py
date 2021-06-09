@@ -3,8 +3,6 @@ import pathlib
 import os
 import shutil
 import confuse
-from confuse.exceptions import NotFoundError
-from confuse.templates import Filename
 
 class FilenameValidate(confuse.Filename):
     """
