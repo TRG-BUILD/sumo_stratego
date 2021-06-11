@@ -21,7 +21,7 @@ uppaal:
 sumo:
   dir: sumo
   model: "cross5VP.sumocfg"
-  nogui: True
+  nogui: False
   tls:
     id: "C"
     min_green: 4

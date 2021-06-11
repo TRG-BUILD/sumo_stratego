@@ -65,7 +65,7 @@ def run(cfg, ctrl, logger):
         
     time = 0
     phase_time = 0
-    while traci.simulation.getMinExpectedNumber() > 0 or time > cfg.mpc.max_steps:
+    while traci.simulation.getMinExpectedNumber() > 0 and time < cfg.mpc.max_steps:
         traci.simulationStep()
 
         # sim step info

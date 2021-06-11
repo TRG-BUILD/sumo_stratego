@@ -1,14 +1,14 @@
 job: 
-  name: latest_wy_high
+  name: latest_no_adder_pq_high
   dir: example
 
 uppaal:
   dir: stratego
-  model: "four_phase_template.xml"
+  model: "fp_no_adder_temp.xml"
   interface: "four_phase_interface.py"
-  query: "four_phase_query.q"
+  query: "four_phase_partial_query.q"
   verifyta: "verifyta"
-  debug: True
+  debug: False
   constants:
     MIN_TIME: 4
     HORIZON: 60
@@ -21,7 +21,7 @@ uppaal:
 sumo:
   dir: sumo
   model: "cross5VP_high.sumocfg"
-  nogui: True
+  nogui: False
   tls:
     id: "C"
     min_green: 4

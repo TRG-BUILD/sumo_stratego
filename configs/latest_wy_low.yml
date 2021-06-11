@@ -1,12 +1,12 @@
 job: 
-  name: latest_wy_low
+  name: latest_no_adder_pq_low
   dir: example
 
 uppaal:
   dir: stratego
-  model: "four_phase_template.xml"
+  model: "fp_no_adder_temp.xml"
   interface: "four_phase_interface.py"
-  query: "four_phase_query.q"
+  query: "four_phase_partial_query.q"
   verifyta: "verifyta"
   debug: True
   constants:
