@@ -18,13 +18,15 @@ class Controller(StrategoController):
             value = str(value)
         return value
 
-    def get_objective(self):
-        return self.objective
-
     def update_objective(self):
-        C = self.states["A"] + self.states["B"]
-        for elem in C:
-            self.objective += elem * elem
+        self.objective += self.get_objective(self.states)
+
+    def get_objective(self, states):
+        queue = states["A"] + states["B"]
+        objective = 0
+        for elem in queue:
+            objective += elem * elem
+        return objective
 
     def update_state(self, new_values):
         super().update_state(new_values)

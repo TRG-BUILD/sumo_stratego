@@ -1,5 +1,5 @@
 job: 
-  name: 4_way_veh_bin_3
+  name: latest_wy
   dir: example
 
 uppaal:
@@ -10,7 +10,7 @@ uppaal:
   verifyta: "verifyta"
   debug: True
   constants:
-    MAX_TIME: 4
+    MIN_TIME: 4
     HORIZON: 60
   variables:
     A: [0, 0, 0]
@@ -22,8 +22,10 @@ sumo:
   dir: sumo
   model: "cross5VP.sumocfg"
   nogui: False
-  tls: 
+  tls:
     id: "C"
+    min_green: 4
+    transitions: True
     phase_map:
       0: 0 
       1: 1
@@ -51,6 +53,7 @@ sumo:
 mpc:
   step: 5
   warmup: 1
+  max_steps: 3000
 
 logging:
   metrics: ["objective", "state"]

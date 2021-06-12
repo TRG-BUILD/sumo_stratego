@@ -4,7 +4,7 @@
 
     <input>
         <net-file value="networks/cross5_LFR_exits.net.xml"/>
-        <additional-files value="networks/cross5.tll.xml"/>
+        <additional-files value="networks/cross5_w_yellow.tll.xml"/>
         <route-files value="
             demands/vehicles.rou.xml
             "/>

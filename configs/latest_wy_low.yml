@@ -1,16 +1,16 @@
 job: 
-  name: 4_way_veh_high_demand
+  name: latest_no_adder_pq_low
   dir: example
 
 uppaal:
   dir: stratego
-  model: "four_phase_template.xml"
+  model: "fp_no_adder_temp.xml"
   interface: "four_phase_interface.py"
-  query: "four_phase_query.q"
+  query: "four_phase_partial_query.q"
   verifyta: "verifyta"
-  debug: False
+  debug: True
   constants:
-    MAX_TIME: 4
+    MIN_TIME: 4
     HORIZON: 60
   variables:
     A: [0, 0, 0]
@@ -20,10 +20,12 @@ uppaal:
 
 sumo:
   dir: sumo
-  model: "cross5VP_high.sumocfg"
+  model: "cross5VP_low.sumocfg"
   nogui: True
-  tls: 
+  tls:
     id: "C"
+    min_green: 4
+    transitions: True
     phase_map:
       0: 0 
       1: 1
@@ -51,6 +53,7 @@ sumo:
 mpc:
   step: 5
   warmup: 1
+  max_steps: 3000
 
 logging:
   metrics: ["objective", "state"]
