@@ -1,0 +1,1298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Sun Jun 13 10:55:15 2021 by Eclipse SUMO duarouter Version v1_7_0+1095-7111e26d53
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="networks/cross5_LFR_exits.net.xml"/>
+        <additional-files value="demands/cyclist.type.xml"/>
+        <route-files value="demands/cyclists.rou.xml"/>
+    </input>
+
+    <output>
+        <output-file value="routes.rou.xml"/>
+        <alternatives-output value="routes.rou.alt.xml"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="3600"/>
+    </time>
+
+    <report>
+        <no-warnings value="true"/>
+        <ignore-errors value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+</configuration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <vType id="cyclist" vClass="bicycle"/>
+    <vehicle id="c2" type="cyclist" depart="10.00">
+        <routeDistribution last="0">
+            <route cost="42.17" probability="1.00000000" edges="WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c5" type="cyclist" depart="15.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c12" type="cyclist" depart="46.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c16" type="cyclist" depart="83.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c17" type="cyclist" depart="87.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c21" type="cyclist" depart="107.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c23" type="cyclist" depart="108.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c25" type="cyclist" depart="117.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c28" type="cyclist" depart="138.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c31" type="cyclist" depart="151.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c33" type="cyclist" depart="160.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c36" type="cyclist" depart="171.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c42" type="cyclist" depart="205.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c46" type="cyclist" depart="224.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c50" type="cyclist" depart="265.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c57" type="cyclist" depart="292.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c60" type="cyclist" depart="309.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c64" type="cyclist" depart="320.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c69" type="cyclist" depart="349.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c70" type="cyclist" depart="357.00">
+        <routeDistribution last="0">
+            <route cost="42.17" probability="1.00000000" edges="WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c73" type="cyclist" depart="382.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c75" type="cyclist" depart="386.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c76" type="cyclist" depart="386.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c77" type="cyclist" depart="409.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c78" type="cyclist" depart="411.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c79" type="cyclist" depart="411.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c80" type="cyclist" depart="418.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c82" type="cyclist" depart="426.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c83" type="cyclist" depart="429.00">
+        <routeDistribution last="0">
+            <route cost="79.20" probability="1.00000000" edges="NN NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c87" type="cyclist" depart="458.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c94" type="cyclist" depart="501.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c97" type="cyclist" depart="515.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c103" type="cyclist" depart="547.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c104" type="cyclist" depart="551.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c109" type="cyclist" depart="567.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c114" type="cyclist" depart="584.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c115" type="cyclist" depart="591.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c117" type="cyclist" depart="600.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c122" type="cyclist" depart="620.00">
+        <routeDistribution last="0">
+            <route cost="77.04" probability="1.00000000" edges="NN NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c125" type="cyclist" depart="659.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c126" type="cyclist" depart="662.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c127" type="cyclist" depart="668.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c129" type="cyclist" depart="672.00">
+        <routeDistribution last="0">
+            <route cost="77.04" probability="1.00000000" edges="NN NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c132" type="cyclist" depart="693.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c136" type="cyclist" depart="716.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c142" type="cyclist" depart="735.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c143" type="cyclist" depart="748.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c144" type="cyclist" depart="750.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c145" type="cyclist" depart="753.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c147" type="cyclist" depart="762.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c149" type="cyclist" depart="770.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c150" type="cyclist" depart="773.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c152" type="cyclist" depart="777.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c155" type="cyclist" depart="791.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c165" type="cyclist" depart="820.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c167" type="cyclist" depart="829.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c168" type="cyclist" depart="830.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c169" type="cyclist" depart="835.00">
+        <routeDistribution last="0">
+            <route cost="79.20" probability="1.00000000" edges="NN NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c170" type="cyclist" depart="840.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c171" type="cyclist" depart="842.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c174" type="cyclist" depart="846.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c176" type="cyclist" depart="853.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c182" type="cyclist" depart="886.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c185" type="cyclist" depart="896.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c186" type="cyclist" depart="898.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c188" type="cyclist" depart="906.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c189" type="cyclist" depart="906.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c190" type="cyclist" depart="906.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c192" type="cyclist" depart="914.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c193" type="cyclist" depart="916.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c195" type="cyclist" depart="922.00">
+        <routeDistribution last="0">
+            <route cost="42.17" probability="1.00000000" edges="WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c198" type="cyclist" depart="932.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c201" type="cyclist" depart="943.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c202" type="cyclist" depart="943.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c210" type="cyclist" depart="1024.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c211" type="cyclist" depart="1027.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c213" type="cyclist" depart="1040.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c218" type="cyclist" depart="1065.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c222" type="cyclist" depart="1083.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c227" type="cyclist" depart="1093.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c228" type="cyclist" depart="1096.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c229" type="cyclist" depart="1100.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c230" type="cyclist" depart="1106.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c232" type="cyclist" depart="1109.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c234" type="cyclist" depart="1115.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c236" type="cyclist" depart="1147.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c237" type="cyclist" depart="1151.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c238" type="cyclist" depart="1163.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c243" type="cyclist" depart="1183.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c244" type="cyclist" depart="1191.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c251" type="cyclist" depart="1211.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c253" type="cyclist" depart="1221.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c254" type="cyclist" depart="1222.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c255" type="cyclist" depart="1226.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c257" type="cyclist" depart="1232.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c259" type="cyclist" depart="1235.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c262" type="cyclist" depart="1250.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c266" type="cyclist" depart="1289.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c269" type="cyclist" depart="1297.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c273" type="cyclist" depart="1314.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c275" type="cyclist" depart="1325.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c276" type="cyclist" depart="1325.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c278" type="cyclist" depart="1330.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c287" type="cyclist" depart="1374.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c288" type="cyclist" depart="1388.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c289" type="cyclist" depart="1392.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c291" type="cyclist" depart="1399.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c295" type="cyclist" depart="1418.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c297" type="cyclist" depart="1443.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c301" type="cyclist" depart="1467.00">
+        <routeDistribution last="0">
+            <route cost="42.17" probability="1.00000000" edges="WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c303" type="cyclist" depart="1470.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c307" type="cyclist" depart="1493.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c309" type="cyclist" depart="1515.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c312" type="cyclist" depart="1533.00">
+        <routeDistribution last="0">
+            <route cost="77.04" probability="1.00000000" edges="NN NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c314" type="cyclist" depart="1540.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c317" type="cyclist" depart="1549.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c320" type="cyclist" depart="1569.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c321" type="cyclist" depart="1569.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c327" type="cyclist" depart="1586.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c329" type="cyclist" depart="1592.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c331" type="cyclist" depart="1601.00">
+        <routeDistribution last="0">
+            <route cost="79.20" probability="1.00000000" edges="NN NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c332" type="cyclist" depart="1603.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c333" type="cyclist" depart="1613.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c334" type="cyclist" depart="1617.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c339" type="cyclist" depart="1625.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c344" type="cyclist" depart="1651.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c347" type="cyclist" depart="1658.00">
+        <routeDistribution last="0">
+            <route cost="77.04" probability="1.00000000" edges="NN NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c351" type="cyclist" depart="1676.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c352" type="cyclist" depart="1676.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c357" type="cyclist" depart="1690.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c360" type="cyclist" depart="1711.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c364" type="cyclist" depart="1741.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c365" type="cyclist" depart="1745.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c366" type="cyclist" depart="1746.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c369" type="cyclist" depart="1766.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c376" type="cyclist" depart="1802.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c379" type="cyclist" depart="1810.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c381" type="cyclist" depart="1816.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c383" type="cyclist" depart="1836.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c384" type="cyclist" depart="1842.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c386" type="cyclist" depart="1843.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c387" type="cyclist" depart="1843.00">
+        <routeDistribution last="0">
+            <route cost="77.04" probability="1.00000000" edges="NN NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c388" type="cyclist" depart="1845.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c392" type="cyclist" depart="1867.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c394" type="cyclist" depart="1883.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c395" type="cyclist" depart="1883.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c400" type="cyclist" depart="1895.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c405" type="cyclist" depart="1932.00">
+        <routeDistribution last="0">
+            <route cost="79.20" probability="1.00000000" edges="NN NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c412" type="cyclist" depart="1957.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c417" type="cyclist" depart="1987.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c420" type="cyclist" depart="2008.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c421" type="cyclist" depart="2012.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c426" type="cyclist" depart="2030.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c427" type="cyclist" depart="2035.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c429" type="cyclist" depart="2038.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c430" type="cyclist" depart="2050.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c432" type="cyclist" depart="2057.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c435" type="cyclist" depart="2082.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c448" type="cyclist" depart="2137.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c449" type="cyclist" depart="2140.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c451" type="cyclist" depart="2162.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c458" type="cyclist" depart="2205.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c459" type="cyclist" depart="2213.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c460" type="cyclist" depart="2213.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c462" type="cyclist" depart="2215.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c464" type="cyclist" depart="2222.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c466" type="cyclist" depart="2238.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c470" type="cyclist" depart="2267.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c471" type="cyclist" depart="2267.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c473" type="cyclist" depart="2275.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c476" type="cyclist" depart="2288.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c482" type="cyclist" depart="2317.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c487" type="cyclist" depart="2382.00">
+        <routeDistribution last="0">
+            <route cost="79.20" probability="1.00000000" edges="NN NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c489" type="cyclist" depart="2396.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c490" type="cyclist" depart="2400.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c493" type="cyclist" depart="2415.00">
+        <routeDistribution last="0">
+            <route cost="42.17" probability="1.00000000" edges="WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c499" type="cyclist" depart="2433.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c501" type="cyclist" depart="2460.00">
+        <routeDistribution last="0">
+            <route cost="77.04" probability="1.00000000" edges="NN NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c502" type="cyclist" depart="2471.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c505" type="cyclist" depart="2502.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c506" type="cyclist" depart="2506.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c507" type="cyclist" depart="2509.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c509" type="cyclist" depart="2521.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c511" type="cyclist" depart="2530.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c513" type="cyclist" depart="2540.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c515" type="cyclist" depart="2546.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c519" type="cyclist" depart="2599.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c522" type="cyclist" depart="2629.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c523" type="cyclist" depart="2630.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c526" type="cyclist" depart="2643.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c527" type="cyclist" depart="2645.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c544" type="cyclist" depart="2717.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c545" type="cyclist" depart="2717.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c549" type="cyclist" depart="2733.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c551" type="cyclist" depart="2739.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c552" type="cyclist" depart="2741.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c554" type="cyclist" depart="2759.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c557" type="cyclist" depart="2767.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c559" type="cyclist" depart="2776.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c572" type="cyclist" depart="2863.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c574" type="cyclist" depart="2873.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c575" type="cyclist" depart="2875.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c576" type="cyclist" depart="2890.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c577" type="cyclist" depart="2892.00">
+        <routeDistribution last="0">
+            <route cost="42.17" probability="1.00000000" edges="WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c578" type="cyclist" depart="2898.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c579" type="cyclist" depart="2909.00">
+        <routeDistribution last="0">
+            <route cost="70.00" probability="1.00000000" edges="WW WC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c580" type="cyclist" depart="2917.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c586" type="cyclist" depart="2946.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c587" type="cyclist" depart="2947.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c588" type="cyclist" depart="2948.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c599" type="cyclist" depart="3007.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c600" type="cyclist" depart="3015.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c601" type="cyclist" depart="3030.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c604" type="cyclist" depart="3043.00">
+        <routeDistribution last="0">
+            <route cost="79.20" probability="1.00000000" edges="NN NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c610" type="cyclist" depart="3064.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c612" type="cyclist" depart="3075.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c613" type="cyclist" depart="3084.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c614" type="cyclist" depart="3086.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c616" type="cyclist" depart="3088.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c619" type="cyclist" depart="3112.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c626" type="cyclist" depart="3135.00">
+        <routeDistribution last="0">
+            <route cost="44.37" probability="1.00000000" edges="SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c632" type="cyclist" depart="3153.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c643" type="cyclist" depart="3219.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c645" type="cyclist" depart="3227.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="EE EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c650" type="cyclist" depart="3264.00">
+        <routeDistribution last="0">
+            <route cost="71.62" probability="1.00000000" edges="WW WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c652" type="cyclist" depart="3291.00">
+        <routeDistribution last="0">
+            <route cost="42.75" probability="1.00000000" edges="EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c656" type="cyclist" depart="3316.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c661" type="cyclist" depart="3345.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c663" type="cyclist" depart="3355.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c666" type="cyclist" depart="3363.00">
+        <routeDistribution last="0">
+            <route cost="72.20" probability="1.00000000" edges="SS SC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c667" type="cyclist" depart="3365.00">
+        <routeDistribution last="0">
+            <route cost="79.20" probability="1.00000000" edges="NN NC CS"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c669" type="cyclist" depart="3379.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="EE EC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c670" type="cyclist" depart="3380.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c671" type="cyclist" depart="3389.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="WC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c672" type="cyclist" depart="3408.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c677" type="cyclist" depart="3426.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c678" type="cyclist" depart="3432.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c681" type="cyclist" depart="3448.00">
+        <routeDistribution last="0">
+            <route cost="5.56" probability="1.00000000" edges="SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c682" type="cyclist" depart="3455.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c684" type="cyclist" depart="3458.00">
+        <routeDistribution last="0">
+            <route cost="42.71" probability="1.00000000" edges="SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c687" type="cyclist" depart="3495.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c693" type="cyclist" depart="3515.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c700" type="cyclist" depart="3534.00">
+        <routeDistribution last="0">
+            <route cost="40.43" probability="1.00000000" edges="NN NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c702" type="cyclist" depart="3536.00">
+        <routeDistribution last="0">
+            <route cost="32.86" probability="1.00000000" edges="WW WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c704" type="cyclist" depart="3546.00">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="EE EC CN"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c705" type="cyclist" depart="3547.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="NC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c706" type="cyclist" depart="3550.00">
+        <routeDistribution last="0">
+            <route cost="5.02" probability="1.00000000" edges="WC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c708" type="cyclist" depart="3551.00">
+        <routeDistribution last="0">
+            <route cost="77.04" probability="1.00000000" edges="NN NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c709" type="cyclist" depart="3553.00">
+        <routeDistribution last="0">
+            <route cost="33.40" probability="1.00000000" edges="SS SC"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c712" type="cyclist" depart="3569.00">
+        <routeDistribution last="0">
+            <route cost="43.79" probability="1.00000000" edges="EC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c713" type="cyclist" depart="3571.00">
+        <routeDistribution last="0">
+            <route cost="70.54" probability="1.00000000" edges="SS SC CE"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c714" type="cyclist" depart="3576.00">
+        <routeDistribution last="0">
+            <route cost="41.63" probability="1.00000000" edges="NC CW"/>
+        </routeDistribution>
+    </vehicle>
+    <vehicle id="c716" type="cyclist" depart="3582.00">
+        <routeDistribution last="0">
+            <route cost="42.17" probability="1.00000000" edges="WC CS"/>
+        </routeDistribution>
+    </vehicle>
+</routes>

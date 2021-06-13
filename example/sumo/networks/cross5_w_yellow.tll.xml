@@ -1,9 +1,9 @@
 <additional>
     <tlLogic id="C" type="static" programID="1" offset="0">
-        <phase duration="10" state="gGgGrrrrrrgGgGrrrrrrrGrG" name="0_NS_xFR" />
-        <phase duration="10" state="rrrrGrrrrrrrrrGrrrrrrrrr" name="1_NS_Lxx" />
-        <phase duration="10" state="rrrrrgGgGgrrrrrgGgGgGrGr" name="2_EW_lFR" />
-        <phase duration="10" state="rrrrrrrrrGrrrrrrrrrGrrrr" name="3_EW_Lxx" />
+        <phase duration="10" state="gGgGrrrrrrgGgGrrrrrrrGrG" next="4" name="0_NS_xFR" />
+        <phase duration="10" state="rrrrGrrrrrrrrrGrrrrrrrrr" next="7" name="1_NS_Lxx" />
+        <phase duration="10" state="rrrrrgGgGgrrrrrgGgGgGrGr" next="10" name="2_EW_lFR" />
+        <phase duration="10" state="rrrrrrrrrGrrrrrrrrrGrrrr" next="11" name="3_EW_Lxx" />
 		<phase duration="3" state="yyyyrrrrrryyyyrrrrrrrrrr" next="1" name="(0, 1)" />
 		<phase duration="3" state="yyyyrrrrrryyyyrrrrrrrrrr" next="2" name="(0, 2)" />
 		<phase duration="3" state="rrrryrrrrrrrrryrrrrrrrrr" next="0" name="(1, 0)" />

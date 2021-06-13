@@ -91,11 +91,14 @@ And then running `randomTrips.py` with this definition:
 
 ```sh
 python $SUMO_HOME/tools/randomTrips.py \
-    -n cross4.net.xml \
+    -n networks/cross5_LFR_exits.net.xml \
     -o demands/cyclists.rou.xml \
     --trip-attributes='type="cyclist"' \
     --additional-file demands/cyclist.type.xml \
     --edge-permission bicycle \
+    --period 5 \
+    --binomial 25 \
+    --prefix "c" \
     --seed 42 \
     --weights-prefix edge_weights \
     --validate
@@ -135,7 +138,7 @@ python $SUMO_HOME/tools/randomTrips.py -n sumo/networks/cross5_LFR_exits.net.xml
 
 `four_phase_2` more conservative period
 ```
-python $SUMO_HOME/tools/randomTrips.py -n sumo/networks/cross5_LFR_exits.net.xml -o sumo/demands/vehicles.rou.xml --weights-prefix sumo/demands/edge_weights -b 0 -e 500 -p 3
+python $SUMO_HOME/tools/randomTrips.py -n sumo/networks/cross5_LFR_exits.net.xml -o sumo/demands/vehicles.rou.xml --weights-prefix sumo/demands/edge_weights -b 0 -e 500 -p 3 --binomial 5
 ```
 
 

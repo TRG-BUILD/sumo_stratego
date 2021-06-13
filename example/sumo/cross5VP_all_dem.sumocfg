@@ -4,9 +4,12 @@
 
     <input>
         <net-file value="networks/cross5_LFR_exits.net.xml"/>
-        <additional-files value="networks/cross5_w_yellow.tll.xml"/>
+        <additional-files value="
+            networks/cross5_w_yellow.tll.xml"/>
         <route-files value="
-            demands/vehicles.rou.xml
+            demands/vehicles.rou.xml,
+            demands/cyclists.rou.xml,
+            demands/pedestrians.rou.xml
             "/>
     </input>
 
@@ -17,7 +20,7 @@
     
 
     <processing>
-        <time-to-teleport value="-1"/>
+        <time-to-teleport value="300"/>
     </processing>
 
     <gui_only>

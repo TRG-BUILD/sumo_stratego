@@ -81,8 +81,10 @@ def get_valid_config():
             'duration_var': confuse.Optional(str)
             }),
         'extract': confuse.Sequence({
-            'feature': confuse.Choice(["queue", "speed"]),
-            'lanes': dict
+            'user_type': str, # NB! is not really validated
+            'feature': confuse.Choice(["count", "speed", "delay", "waiting_time"]),
+            'from': confuse.Choice(['lane', 'detector', 'phase']),
+            'mapping': dict
             })
     }
 

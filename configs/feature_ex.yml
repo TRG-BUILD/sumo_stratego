@@ -1,0 +1,80 @@
+job: 
+  name: latest
+  dir: example
+
+uppaal:
+  dir: stratego
+  model: "four_phase_template.xml"
+  interface: "four_phase_interface.py"
+  query: "four_phase_query.q"
+  verifyta: "verifyta"
+  debug: True
+  constants:
+    MIN_TIME: 4
+    HORIZON: 60
+  variables:
+    A: [0, 0, 0]
+    B: [0, 0, 0]
+    CYC_A: 0
+    CYC_B: 0
+    PED_A: 0
+    PED_B: 0
+    x: 0.0
+    is_active: [0, 0, 0, 0]
+
+sumo:
+  dir: sumo
+  model: "cross5VP_all_dem.sumocfg"
+  nogui: False
+  tls:
+    id: "C"
+    min_green: 4
+    transitions: False
+    phase_map:
+      0: 0 
+      1: 1
+      2: 2
+      3: 3
+    phase_var: "is_active"
+
+  extract:
+    - feature: "count"
+      user_type: "DEFAULT_VEHTYPE"
+      from: "lane"
+      mapping:
+        NC_4: ["A", 0]
+        NC_3: ["A", 1]
+        NC_2: ["A", 2]
+        SC_4: ["A", 0]
+        SC_3: ["A", 1]
+        SC_2: ["A", 2]
+        WC_4: ["B", 0]
+        WC_3: ["B", 1]
+        WC_2: ["B", 2]
+        EC_4: ["B", 0]
+        EC_3: ["B", 1]
+        EC_2: ["B", 2]
+
+    - feature: 'count'
+      user_type: 'cyclist'
+      from: 'phase'
+      mapping:
+        0: "CYC_A"
+        2: "CYC_B"
+
+    - feature: 'count'
+      user_type: 'pedestrian'
+      from: 'phase'
+      mapping:
+        0: "PED_A"
+        2: "PED_B"
+
+
+mpc:
+  step: 5
+  warmup: 1
+  max_steps: 3000
+
+logging:
+  metrics: ["objective", "state"]
+  
