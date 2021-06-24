@@ -20,12 +20,12 @@ uppaal:
 
 sumo:
   dir: sumo
-  model: "cross5VP.sumocfg"
-  nogui: True
+  model: "cross6VPS.sumocfg"
+  nogui: False
   tls:
     id: "C"
     min_green: 4
-    transitions: False
+    transitions: True
     phase_map:
       0: 0 
       1: 1
@@ -34,9 +34,10 @@ sumo:
     phase_var: "is_active"
 
   extract:
-    - feature: "queue"
-      type: "vehicle"
-      lanes:
+    - feature: "count"
+      user_type: "DEFAULT_VEHTYPE"
+      from: "lane"
+      mapping:
         NC_4: ["A", 0]
         NC_3: ["A", 1]
         NC_2: ["A", 2]

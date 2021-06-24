@@ -4,13 +4,13 @@
         <phase duration="10" state="rrrrGrrrrrrrrrGrrrrrrrrr" next="7" name="1_NS_Lxx" />
         <phase duration="10" state="rrrrrgGgGgrrrrrgGgGgGrGr" next="10" name="2_EW_lFR" />
         <phase duration="10" state="rrrrrrrrrGrrrrrrrrrGrrrr" next="11" name="3_EW_Lxx" />
-		<phase duration="3" state="yyyyrrrrrryyyyrrrrrrrrrr" next="1" name="(0, 1)" />
-		<phase duration="3" state="yyyyrrrrrryyyyrrrrrrrrrr" next="2" name="(0, 2)" />
-		<phase duration="3" state="rrrryrrrrrrrrryrrrrrrrrr" next="0" name="(1, 0)" />
-		<phase duration="3" state="rrrryrrrrrrrrryrrrrrrrrr" next="2" name="(1, 2)" />
-		<phase duration="3" state="rrrrryyyyyrrrrryyyyyrrrr" next="0" name="(2, 0)" />
-		<phase duration="3" state="rrrrryyyyyrrrrryyyyyrrrr" next="1" name="(2, 1)" />
-		<phase duration="3" state="rrrrryyyygrrrrryyyygrrrr" next="3" name="(2, 3)" />
-		<phase duration="3" state="rrrrrrrrryrrrrrrrrryrrrr" next="0" name="(3, 0)" />
+		<phase duration="5" state="yyyyrrrrrryyyyrrrrrrrrrr" next="1" name="(0, 1)" />
+		<phase duration="5" state="yyyyrrrrrryyyyrrrrrrrrrr" next="2" name="(0, 2)" />
+		<phase duration="5" state="rrrryrrrrrrrrryrrrrrrrrr" next="0" name="(1, 0)" />
+		<phase duration="5" state="rrrryrrrrrrrrryrrrrrrrrr" next="2" name="(1, 2)" />
+		<phase duration="5" state="rrrrryyyyyrrrrryyyyyrrrr" next="0" name="(2, 0)" />
+		<phase duration="5" state="rrrrryyyyyrrrrryyyyyrrrr" next="1" name="(2, 1)" />
+		<phase duration="5" state="rrrrryyyygrrrrryyyygrrrr" next="3" name="(2, 3)" />
+		<phase duration="5" state="rrrrrrrrryrrrrrrrrryrrrr" next="0" name="(3, 0)" />
     </tlLogic>
 </additional>

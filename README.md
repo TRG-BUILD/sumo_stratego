@@ -34,6 +34,52 @@ pip install git+https://github.com/beetbox/confuse.git
 python run.py -c tutorial.yaml
 ```
 
+## Config syntax
+
+The `*.yml` or `*.yaml` job confiuguration file consists of 4 main fields `job`, `uppaal`, `sumo`, and `logging`
+
+### `job`
+Specify the name of your job and the root directory containing all relevant job files.
+
+Example:
+```yml
+job:
+  name: my_simulation
+  dir: sim
+```
+### `uppaal`
+
+```yml
+uppaal:
+  dir: 
+  model:
+  interface:
+  query:
+  verifyta:
+  debug:
+  constants:
+  variables:
+```
+#### `uppaal.constants`
+Initiated th esame for all models
+
+#### `uppaal.variables`
+Names and formats of the variables fed to the Stratego controller through `uppaal.interface`. More on variable substituion in the UPPAAL Stratego interafce library [strategoutil](https://github.com/mihsamusev/strategoutil).
+
+Example:
+```yml
+variables:
+  queue_A: [0, 0, 0]
+  x: 0.0
+```
+`uppaal.interface` module will try to substitute a pre-defined tag for `queue_A` by list of 3 ints and pre-defined tag for `x` by a float.
+
+### `sumo`
+
+#### `sumo.tls`
+
+#### `extract`
+
 ## Project structure
 ```
 run.py
@@ -62,10 +108,10 @@ jobs
 
 
 ## TODO
+- document `*.yml` [configs github workflow style](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions)
 - add constants, HORIZON, MIN_TIME, MAX_TIME
-- add logging
-- TDD for feature extraction pipeline definitions
 - running batches
+- add logging for state and fcd
 - extend loggers to couple with matplotlib and writting states to DB
 
 
